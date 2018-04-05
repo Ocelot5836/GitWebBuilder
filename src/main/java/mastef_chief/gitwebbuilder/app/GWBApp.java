@@ -55,6 +55,15 @@ public class GWBApp extends Application {
     private Button colorYellowButton;
     private Button colorWhiteButton;
 
+    //Formatting Buttons
+    private Button obfuscateButton;
+    private Button boldButton;
+    private Button strikethroughButton;
+    private Button underlineButton;
+    private Button italicButton;
+    private Button resetButton;
+
+
     private ComboBox.List<String> editorSelectionList;
     private ComboBox.List<String> textFormattingSelectionList;
 
@@ -231,6 +240,9 @@ public class GWBApp extends Application {
             if(newValue != oldValue){
                 if (newValue.equals("Coloring")) {
 
+                    //Set Formatting Buttons Visible to false
+                    obfuscateButton.setVisible(false);
+
                     //Set Color Buttons Visible to true
                     colorBlackButton.setVisible(true);
                     colorDarkBlueButton.setVisible(true);
@@ -251,6 +263,9 @@ public class GWBApp extends Application {
 
                 }
                 if (newValue.equals("Formatting")) {
+
+                    //Set Formatting Buttons Visible to true
+                    obfuscateButton.setVisible(true);
 
                     //Set Color Buttons Visible to false
                     colorBlackButton.setVisible(false);
@@ -421,6 +436,17 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilderTF.addComponent(colorWhiteButton);
 
+
+        //Formatting Button
+        obfuscateButton = new Button(75,147, 16, 16, TextFormatting.OBFUSCATED + "A");
+        obfuscateButton.setVisible(false);
+        obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) ->{
+            if(mouseButton == 0){
+                siteBuilderTFTextArea.writeText("~&k");
+                siteBuilderTFTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilderTF.addComponent(obfuscateButton);
 
         /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
