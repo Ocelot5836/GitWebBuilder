@@ -1,11 +1,13 @@
 package mastef_chief.gitwebbuilder.app;
 
 import com.mrcrayfish.device.api.app.*;
+import com.mrcrayfish.device.api.app.Dialog;
 import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.ComboBox;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.io.File;
+import com.mrcrayfish.device.api.io.Folder;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
@@ -21,6 +23,9 @@ import net.minecraftforge.common.util.Constants;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.lang.System;
 import java.util.function.Predicate;
@@ -32,7 +37,13 @@ public class GWBApp extends Application {
 
     Minecraft mc = Minecraft.getMinecraft();
 
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
+    Clipboard clipboard = toolkit.getSystemClipboard();
+
     private float rotationCounter = 0;
+    private int characterCounter = 0;
+
+    private File currentFile;
 
     private StandardLayout layoutMain;
     private StandardLayout layoutSiteBuilder; //Editor View
@@ -41,8 +52,10 @@ public class GWBApp extends Application {
 
     private Button newSiteButton;
     private Button loadSiteButton;
-    private Button saveSiteButton;
     private Button backToMenuButton;
+    private Button saveSiteButton;
+    private Button exportToPastebinButton;
+    private Button copyToClipboardButton;
 
     //16 Color Buttons
     private Button colorBlackButton;
@@ -97,15 +110,16 @@ public class GWBApp extends Application {
     @Override
     public void init() {
 
-        Paste.setDeveloperKey("12bfae53f22fc3d7bd73eb515f5a147f");
+        /*Paste.setDeveloperKey("12bfae53f22fc3d7bd73eb515f5a147f");
 
         try {
-
-            System.out.println(new Paste("Code here!", "File Name", Paste.Visibility.PUBLIC, Paste.Expire.ONE_HOUR, Paste.Language.JAVA).upload());
+                System.out.println(new Paste("This § will show", "TEST", Paste.Visibility.UNLISTED, Paste.Expire.ONE_HOUR, Paste.Language.JAVA).upload().toString());
 
         }catch (IOException e){
             e.printStackTrace();
-        }
+        }*/
+
+
         /*--------------------------------------------------------------------------*/
 
         layoutMain = new StandardLayout("Menu",363, 165, this, null);
@@ -130,14 +144,13 @@ public class GWBApp extends Application {
 
         layoutMain.setInitListener(() ->
         {
-            //notes.getItems().clear();
             FileSystem.getApplicationFolder(this, (folder, success) ->
             {
                 if(success)
                 {
                     folder.search(file -> file.isForApplication(this)).forEach(file ->
                     {
-                        //notes.addItem(ApplicationNoteStash.Note.fromFile(file));
+
                     });
                 }
                 else
@@ -167,6 +180,7 @@ public class GWBApp extends Application {
                     {
                         NBTTagCompound data = file.getData();
                         siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
+                        currentFile = file;
                         this.setCurrentLayout(layoutSiteBuilder);
                         return true;
                     }
@@ -216,12 +230,12 @@ public class GWBApp extends Application {
                 if (newValue.equals("Site Live View")) {
                     if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)"){
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("~&", "§").replace("\n\n", "\n").replace("Â", ""));
+                        siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("~&", "§").replace("\n\n", "\n"));
                         siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     }
                     if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("~&", "§").replace("\n\n", "\n").replace("Â", ""));
+                        siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("~&", "§").replace("\n\n", "\n"));
                         siteBuilderTextArea.setText(siteBuilderTFTextArea.getText().replace("\n\n", "\n"));
                     }
                     this.setCurrentLayout(layoutSiteBuilderLV);
@@ -231,7 +245,20 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(editorSelectionList);
 
+        backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
+        backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
+        backToMenuButton.setClickListener((mouseX, mouseY, mouseButton) ->{
+            if(mouseButton == 0){
+                this.setCurrentLayout(layoutMain);
+                siteBuilderTextArea.clear();
+                siteBuilderTFTextArea.clear();
+                siteBuilderLVTextArea.clear();
+            }
+        });
+        layoutSiteBuilder.addComponent(backToMenuButton);
+
         saveSiteButton = new Button(118, 2, Icons.SAVE);
+        saveSiteButton.setToolTip("Save Your Site", "Saves your site to a file");
         saveSiteButton.setClickListener((mouseX, mouseY, mouseButton) ->{
             if(mouseButton == 0){
                 NBTTagCompound data = new NBTTagCompound();
@@ -252,17 +279,67 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(saveSiteButton);
 
-        backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
-        backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
-        backToMenuButton.setClickListener((mouseX, mouseY, mouseButton) ->{
+        exportToPastebinButton = new Button(136, 2, Icons.EXPORT);
+        exportToPastebinButton.setToolTip("Export To PasteBin", "Coming Soon");
+        /*exportToPastebinButton.setClickListener((mouseX, mouseY, mouseButton) ->{
             if(mouseButton == 0){
-                this.setCurrentLayout(layoutMain);
-                siteBuilderTextArea.clear();
-                siteBuilderTFTextArea.clear();
-                siteBuilderLVTextArea.clear();
+                Dialog.Input exportDialog = new Dialog.Input("Site Title:");
+                exportDialog.setTitle("Export Site");
+                exportDialog.setPositiveText("Export");
+                this.openDialog(exportDialog);
+                exportDialog.setResponseHandler((success, v) ->
+                {
+                    if(success)
+                    {
+                        try {
+
+                            System.out.println(exportDialog.getTextFieldInput().toString());
+                            System.out.println(siteBuilderTextArea.getText().replace("~&", "§"));
+
+                            if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)"){
+                                this.openDialog(new Dialog.Message(new Paste(siteBuilderTextArea.getText().replace("~&", "§").replace("\n\n", "\n"), exportDialog.getTextFieldInput().getText(), Paste.Visibility.PUBLIC, Paste.Expire.NEVER, Paste.Language.JAVA).upload().toString()));
+
+                            }
+                            if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)"){
+                                this.openDialog(new Dialog.Message(new Paste(siteBuilderTFTextArea.getText().replace("~&", "§").replace("\n\n", "\n"), exportDialog.getTextFieldInput().getText(), Paste.Visibility.PUBLIC, Paste.Expire.NEVER, Paste.Language.JAVA).upload().toString()));
+
+                            }
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    return true;
+                });
+
+
+                if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)"){
+
+                }
+                if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)"){
+
+                }
+
+            }
+        });*/
+        layoutSiteBuilder.addComponent(exportToPastebinButton);
+
+        copyToClipboardButton = new Button(154, 2, Icons.COPY);
+        copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
+        copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) ->{
+            if(mouseButton == 0){
+
+                if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)"){
+                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("~&", "§").replace("\n\n", "\n"));
+                    clipboard.setContents(code, null);
+                }
+                if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)"){
+                    StringSelection code = new StringSelection(siteBuilderTFTextArea.getText().replace("~&", "§").replace("\n\n", "\n"));
+                    clipboard.setContents(code, null);
+                }
+
             }
         });
-        layoutSiteBuilder.addComponent(backToMenuButton);
+        layoutSiteBuilder.addComponent(copyToClipboardButton);
 
         siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 22);
         layoutSiteBuilder.addComponent(siteBuilderTextArea);
@@ -274,8 +351,10 @@ public class GWBApp extends Application {
         layoutSiteBuilderTF.setTitle("GitWeb Builder (Site Builder Formatting)");
 
         layoutSiteBuilderTF.addComponent(editorSelectionList);
-        layoutSiteBuilderTF.addComponent(saveSiteButton);
         layoutSiteBuilderTF.addComponent(backToMenuButton);
+        layoutSiteBuilderTF.addComponent(saveSiteButton);
+        layoutSiteBuilderTF.addComponent(exportToPastebinButton);
+        layoutSiteBuilderTF.addComponent(copyToClipboardButton);
 
         siteBuilderTFTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 40);
         layoutSiteBuilderTF.addComponent(siteBuilderTFTextArea);
@@ -563,7 +642,6 @@ public class GWBApp extends Application {
         layoutSiteBuilderLV.setTitle("GitWeb Builder (Site Builder Live)");
 
         layoutSiteBuilderLV.addComponent(editorSelectionList);
-        layoutSiteBuilderLV.addComponent(saveSiteButton);
         layoutSiteBuilderLV.addComponent(backToMenuButton);
 
         siteBuilderLVTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 22);
@@ -592,6 +670,31 @@ public class GWBApp extends Application {
     @Override
     public void handleKeyTyped(char character, int code) {
         super.handleKeyTyped(character, code);
+        if (characterCounter == 20){
+        if(currentFile != null) {
+
+                NBTTagCompound data = new NBTTagCompound();
+            if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                data.setString("content", siteBuilderTextArea.getText());
+                currentFile.setData(data, (v, success) -> {
+                    if (success) {
+
+                    }
+                });
+            }
+            if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                data.setString("content", siteBuilderTFTextArea.getText());
+                currentFile.setData(data, (v, success) -> {
+                    if (success) {
+
+                    }
+                });
+            }
+
+        }
+            characterCounter = 0;
+        }
+        characterCounter++;
 
         if(code == Keyboard.KEY_DELETE){
             if(this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)"){
@@ -619,6 +722,12 @@ public class GWBApp extends Application {
 
         return true;
 
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        currentFile = null;
     }
 
     /**
