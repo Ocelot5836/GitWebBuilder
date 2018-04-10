@@ -216,12 +216,14 @@ public class GWBApp extends Application {
                 if (newValue.equals("Site Live View")) {
                     if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
+                        //siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
+                        siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
                         siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     }
                     if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
+                        //siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
+                        siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTFTextArea.getText().replace("\n\n","\n")));
                         siteBuilderTextArea.setText(siteBuilderTFTextArea.getText().replace("\n\n", "\n"));
                     }
                     this.setCurrentLayout(layoutSiteBuilderLV);
@@ -687,7 +689,19 @@ public class GWBApp extends Application {
 
     }
 
-    public void renderLiveView(){
+    public String renderLiveView(String content){
+
+        return content
+                //new line fix
+                .replace("\n\n","\n")
+                //color conversion to unicode format
+                .replace("&0","\u00A70").replace("&1","\u00A71").replace("&2","\u00A72").replace("&3","\u00A73")
+                .replace("&4","\u00A74").replace("&5","\u00A75").replace("&6","\u00A76").replace("&7","\u00A77")
+                .replace("&8","\u00A78").replace("&9","\u00A79").replace("&a","\u00A7a").replace("&b","\u00A7b")
+                .replace("&c","\u00A7c").replace("&d","\u00A7d").replace("&e","\u00A7e").replace("&f","\u00A7f")
+                //Formatting conversion to unicode format
+                .replace("&k","\u00A7k").replace("&l","\u00A7l").replace("&m","\u00A7m").replace("&n","\u00A7n")
+                .replace("&o","\u00A7o").replace("&r","\u00A7r");
 
     }
 
