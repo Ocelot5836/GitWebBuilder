@@ -291,7 +291,9 @@ public class GWBApp extends Application {
                             }
                         });
                     }
-                }else if(currentFile == null){
+                }else {
+
+                    //Todo fix save crash when current file is null
                     this.openDialog(saveDialog);
                 }
 
@@ -328,7 +330,6 @@ public class GWBApp extends Application {
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
         copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-
                 if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
                     StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
@@ -654,6 +655,8 @@ public class GWBApp extends Application {
         //Todo Add ComboBox with selection of Color Codes Buttons & Formatting Codes Buttons
 
     }
+
+    //Todo make getContent Method to reduce code
 
     public void createPastebin(String title, String code) {
         try {
