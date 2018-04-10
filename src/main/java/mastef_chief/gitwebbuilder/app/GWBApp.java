@@ -8,6 +8,7 @@ import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
+import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
@@ -21,12 +22,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
 
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.*;
+import java.lang.System;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.function.Predicate;
@@ -119,7 +122,7 @@ public class GWBApp extends Application {
         layoutMain.setIcon(Icons.HOME);
         layoutMain.setTitle("GitWeb Builder (Menu)");
         layoutMain.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
-            GlStateManager.pushMatrix();
+            /*GlStateManager.pushMatrix();
             {
                 GlStateManager.enableDepth();
                 GlStateManager.disableLighting();
@@ -132,7 +135,7 @@ public class GWBApp extends Application {
                 gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
                 GlStateManager.disableDepth();
             }
-            GlStateManager.popMatrix();
+            GlStateManager.popMatrix();*/
         });
 
         layoutMain.setInitListener(() ->
@@ -661,11 +664,40 @@ public class GWBApp extends Application {
         siteBuilderLVTextArea.setWrapText(true);
         layoutSiteBuilderLV.addComponent(siteBuilderLVTextArea);
 
-        //Todo Add ComboBox with selection of Color Codes Buttons & Formatting Codes Buttons
-
     }
 
     //Todo make getContent Method to reduce code
+
+
+    @Override
+    public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
+        super.render(laptop, mc, x, y, mouseX, mouseY, active, partialTicks);
+
+        if (rotationCounter == 360) {
+            rotationCounter = 0;
+        }
+
+        rotationCounter = rotationCounter + 0.5F;
+
+        layoutMain.setBackground((gui, mc1, x1, y1, width, height, mouseX1, mouseY1, windowActive) -> {
+            GlStateManager.pushMatrix();
+            {
+                GlStateManager.enableDepth();
+                GlStateManager.disableLighting();
+                GlStateManager.translate(x1 + 150, y1 - 20, 250);
+                GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
+                GlStateManager.rotate(5F, 1, 0, 0);
+                GlStateManager.rotate(200F, 0, 0, 1);
+                GlStateManager.rotate(-rotationCounter, 0, 1, 0);
+                mc1.getTextureManager().bindTexture(logo);
+                gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
+                GlStateManager.disableDepth();
+            }
+            GlStateManager.popMatrix();
+        });
+
+
+    }
 
     public void createPastebin(String title, String code) {
         try {
@@ -702,18 +734,6 @@ public class GWBApp extends Application {
                 //Formatting conversion to unicode format
                 .replace("&k","\u00A7k").replace("&l","\u00A7l").replace("&m","\u00A7m").replace("&n","\u00A7n")
                 .replace("&o","\u00A7o").replace("&r","\u00A7r");
-
-    }
-
-    @Override
-    public void onTick() {
-        super.onTick();
-
-        if (rotationCounter == 360) {
-            rotationCounter = 0;
-        }
-
-        rotationCounter = rotationCounter + 1;
 
     }
 
