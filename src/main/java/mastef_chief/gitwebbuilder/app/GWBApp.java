@@ -219,12 +219,12 @@ public class GWBApp extends Application {
                 if (newValue.equals("Site Live View")) {
                     if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                        siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     }
                     if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
                         siteBuilderLVTextArea.clear();
-                        siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                        siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         siteBuilderTextArea.setText(siteBuilderTFTextArea.getText().replace("\n\n", "\n"));
                     }
                     this.setCurrentLayout(layoutSiteBuilderLV);
@@ -311,10 +311,10 @@ public class GWBApp extends Application {
                 {
                     if (success) {
                         if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
-                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         }
                         if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
-                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         }
 
                     }
@@ -330,11 +330,11 @@ public class GWBApp extends Application {
             if (mouseButton == 0) {
 
                 if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
-                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
                 }
                 if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
-                    StringSelection code = new StringSelection(siteBuilderTFTextArea.getText().replace("%&", "§").replace("\n\n", "\n"));
+                    StringSelection code = new StringSelection(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
                 }
                 TaskManager.sendTask(new TaskNotificationCopiedCode());
@@ -433,7 +433,7 @@ public class GWBApp extends Application {
         colorBlackButton = new Button(75, 147, 16, 16, TextFormatting.BLACK + "A");
         colorBlackButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&0");
+                siteBuilderTFTextArea.writeText("&0");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -442,7 +442,7 @@ public class GWBApp extends Application {
         colorDarkBlueButton = new Button(93, 147, 16, 16, TextFormatting.DARK_BLUE + "A");
         colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&1");
+                siteBuilderTFTextArea.writeText("&1");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -451,7 +451,7 @@ public class GWBApp extends Application {
         colorDarkGreenButton = new Button(111, 147, 16, 16, TextFormatting.DARK_GREEN + "A");
         colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&2");
+                siteBuilderTFTextArea.writeText("&2");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -460,7 +460,7 @@ public class GWBApp extends Application {
         colorDarkAquaButton = new Button(129, 147, 16, 16, TextFormatting.DARK_AQUA + "A");
         colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&3");
+                siteBuilderTFTextArea.writeText("&3");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -469,7 +469,7 @@ public class GWBApp extends Application {
         colorDarkRedButton = new Button(147, 147, 16, 16, TextFormatting.DARK_RED + "A");
         colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&4");
+                siteBuilderTFTextArea.writeText("&4");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -478,7 +478,7 @@ public class GWBApp extends Application {
         colorDarkPurpleButton = new Button(165, 147, 16, 16, TextFormatting.DARK_PURPLE + "A");
         colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&5");
+                siteBuilderTFTextArea.writeText("&5");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -487,7 +487,7 @@ public class GWBApp extends Application {
         colorGoldButton = new Button(183, 147, 16, 16, TextFormatting.GOLD + "A");
         colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&6");
+                siteBuilderTFTextArea.writeText("&6");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -496,7 +496,7 @@ public class GWBApp extends Application {
         colorGrayButton = new Button(201, 147, 16, 16, TextFormatting.GRAY + "A");
         colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&7");
+                siteBuilderTFTextArea.writeText("&7");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -505,7 +505,7 @@ public class GWBApp extends Application {
         colorDarkGrayButton = new Button(219, 147, 16, 16, TextFormatting.DARK_GRAY + "A");
         colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&8");
+                siteBuilderTFTextArea.writeText("&8");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -514,7 +514,7 @@ public class GWBApp extends Application {
         colorBlueButton = new Button(237, 147, 16, 16, TextFormatting.BLUE + "A");
         colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&9");
+                siteBuilderTFTextArea.writeText("&9");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -523,7 +523,7 @@ public class GWBApp extends Application {
         colorGreenButton = new Button(255, 147, 16, 16, TextFormatting.GREEN + "A");
         colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&a");
+                siteBuilderTFTextArea.writeText("&a");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -532,7 +532,7 @@ public class GWBApp extends Application {
         colorAquaButton = new Button(273, 147, 16, 16, TextFormatting.AQUA + "A");
         colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&b");
+                siteBuilderTFTextArea.writeText("&b");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -541,7 +541,7 @@ public class GWBApp extends Application {
         colorRedButton = new Button(291, 147, 16, 16, TextFormatting.RED + "A");
         colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&c");
+                siteBuilderTFTextArea.writeText("&c");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -550,7 +550,7 @@ public class GWBApp extends Application {
         colorLightPurpleButton = new Button(309, 147, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
         colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&d");
+                siteBuilderTFTextArea.writeText("&d");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -559,7 +559,7 @@ public class GWBApp extends Application {
         colorYellowButton = new Button(327, 147, 16, 16, TextFormatting.YELLOW + "A");
         colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&e");
+                siteBuilderTFTextArea.writeText("&e");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -568,7 +568,7 @@ public class GWBApp extends Application {
         colorWhiteButton = new Button(345, 147, 16, 16, TextFormatting.WHITE + "A");
         colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&f");
+                siteBuilderTFTextArea.writeText("&f");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -580,7 +580,7 @@ public class GWBApp extends Application {
         obfuscateButton.setVisible(false);
         obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&k");
+                siteBuilderTFTextArea.writeText("&k");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -590,7 +590,7 @@ public class GWBApp extends Application {
         boldButton.setVisible(false);
         boldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&l");
+                siteBuilderTFTextArea.writeText("&l");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -600,7 +600,7 @@ public class GWBApp extends Application {
         strikethroughButton.setVisible(false);
         strikethroughButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&m");
+                siteBuilderTFTextArea.writeText("&m");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -610,7 +610,7 @@ public class GWBApp extends Application {
         underlineButton.setVisible(false);
         underlineButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&n");
+                siteBuilderTFTextArea.writeText("&n");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -620,7 +620,7 @@ public class GWBApp extends Application {
         italicButton.setVisible(false);
         italicButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&o");
+                siteBuilderTFTextArea.writeText("&o");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
@@ -630,7 +630,7 @@ public class GWBApp extends Application {
         resetButton.setVisible(false);
         resetButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("%&r");
+                siteBuilderTFTextArea.writeText("&r");
                 siteBuilderTFTextArea.setFocused(true);
             }
         });
