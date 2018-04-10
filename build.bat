@@ -1,2 +1,2 @@
-gradlew build
-pause
+@echo off
+start gradlew clean build
