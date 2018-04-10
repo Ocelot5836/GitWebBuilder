@@ -92,9 +92,6 @@ public class GWBApp extends Application {
 
     private Label descLabel;
 
-    private Dialog.SaveFile saveDialog;
-    private Dialog.OpenFile openDialog;
-
     private TextArea siteBuilderTextArea;
     private TextArea siteBuilderTFTextArea;
     private TextArea siteBuilderLVTextArea;
@@ -163,7 +160,7 @@ public class GWBApp extends Application {
         });
         layoutMain.addComponent(newSiteButton);
         loadSiteButton = new Button(250, 85, 75, 16, "Load Site", Icons.LOAD);
-        openDialog = new Dialog.OpenFile(this);
+        Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
         loadSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 openDialog.setResponseHandler((success, file) ->
@@ -259,7 +256,7 @@ public class GWBApp extends Application {
                     data.setString("content", siteBuilderTFTextArea.getText());
                 }
 
-                saveDialog = new Dialog.SaveFile(this, data);
+                Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                 saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
                     return true;
@@ -292,8 +289,18 @@ public class GWBApp extends Application {
                         });
                     }
                 }else {
-
-                    //Todo fix save crash when current file is null
+                    NBTTagCompound data = new NBTTagCompound();
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
+                        data.setString("content", siteBuilderTextArea.getText());
+                    }
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
+                        data.setString("content", siteBuilderTFTextArea.getText());
+                    }
+                    Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                    saveDialog.setFolder(getApplicationFolderPath());
+                    saveDialog.setResponseHandler((success, file) -> {
+                        return true;
+                    });
                     this.openDialog(saveDialog);
                 }
 
@@ -677,6 +684,10 @@ public class GWBApp extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void renderLiveView(){
 
     }
 
