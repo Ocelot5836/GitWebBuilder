@@ -2,8 +2,8 @@ package mastef_chief.gitwebbuilder.app;
 
 import com.mrcrayfish.device.api.app.*;
 import com.mrcrayfish.device.api.app.Dialog;
+import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Button;
-import com.mrcrayfish.device.api.app.component.ComboBox;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.io.File;
@@ -49,10 +49,10 @@ public class GWBApp extends Application {
 
     private File currentFile;
 
+    private String rawTextSaved = "";
+
     private StandardLayout layoutMain;
-    private StandardLayout layoutSiteBuilder; //Editor View
-    private StandardLayout layoutSiteBuilderTF; //Text Formatting View
-    private StandardLayout layoutSiteBuilderLV; //Live View
+    private StandardLayout layoutSiteBuilder;
 
     private Button newSiteButton;
     private Button loadSiteButton;
@@ -61,6 +61,8 @@ public class GWBApp extends Application {
     private Button exportToPastebinButton;
     private Button saveSiteButton;
     private Button copyToClipboardButton;
+
+    private ButtonToggle liveViewButton;
 
     //16 Color Buttons
     private Button colorBlackButton;
@@ -80,7 +82,6 @@ public class GWBApp extends Application {
     private Button colorYellowButton;
     private Button colorWhiteButton;
 
-
     //Formatting Buttons
     private Button obfuscateButton;
     private Button boldButton;
@@ -89,19 +90,13 @@ public class GWBApp extends Application {
     private Button italicButton;
     private Button resetButton;
 
-
-    private ComboBox.List<String> editorSelectionList;
     private ComboBox.List<String> textFormattingSelectionList;
 
     private Label descLabel;
 
     private TextArea siteBuilderTextArea;
-    private TextArea siteBuilderTFTextArea;
-    private TextArea siteBuilderLVTextArea;
 
     private GWBLogoModel gwbLogoModel = new GWBLogoModel();
-
-    private URL url;
 
     private static final ResourceLocation logo = new ResourceLocation("gitwebbuilder:textures/app/gui/logo.png");
 
@@ -137,7 +132,6 @@ public class GWBApp extends Application {
             });
         });
 
-
         newSiteButton = new Button(250, 65, 75, 16, "New Site", Icons.NEW_FILE);
         newSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -145,11 +139,12 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
+
         layoutMain.addComponent(newSiteButton);
         loadSiteButton = new Button(250, 85, 75, 16, "Load Site", Icons.LOAD);
-        Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
         loadSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
+                Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
                 openDialog.setResponseHandler((success, file) ->
                 {
                     if (file.isForApplication(this)) {
@@ -167,6 +162,7 @@ public class GWBApp extends Application {
                 this.openDialog(openDialog);
             }
         });
+
         layoutMain.addComponent(loadSiteButton);
 
         descLabel = new Label("A Site Builder For GitWeb", 43, 150);
@@ -180,56 +176,14 @@ public class GWBApp extends Application {
         layoutSiteBuilder.setIcon(Icons.EARTH);
         layoutSiteBuilder.setTitle("GitWeb Builder (Site Builder)");
 
-        Object[] editorType = new String[]{"Site Editor View", "Text Formatting View", "Site Live View"};
-        editorSelectionList = new ComboBox.List(235, 3, 125, editorType);
-        editorSelectionList.setChangeListener((oldValue, newValue) -> {
-            if (newValue != oldValue) {
-                if (newValue.equals("Site Editor View")) {
-                    if (this.getCurrentLayout().getTitle() != "GitWeb Builder (Site Builder Live)") {
-                        siteBuilderTextArea.clear();
-                        siteBuilderTextArea.setText(siteBuilderTFTextArea.getText().replace("\n\n", "\n"));
-                        siteBuilderTextArea.setFocused(true);
-                    }
-                    this.setCurrentLayout(layoutSiteBuilder);
-                }
-                if (newValue.equals("Text Formatting View")) {
-                    if (this.getCurrentLayout().getTitle() != "GitWeb Builder (Site Builder Live)") {
-                        siteBuilderTFTextArea.clear();
-                        siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
-                        siteBuilderTFTextArea.setFocused(true);
-                    }
-                    this.setCurrentLayout(layoutSiteBuilderTF);
-                }
-                if (newValue.equals("Site Live View")) {
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
-                        siteBuilderLVTextArea.clear();
-                        //siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
-                        siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
-                        siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
-                    }
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                        siteBuilderLVTextArea.clear();
-                        //siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
-                        siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTFTextArea.getText().replace("\n\n","\n")));
-                        siteBuilderTextArea.setText(siteBuilderTFTextArea.getText().replace("\n\n", "\n"));
-                    }
-                    this.setCurrentLayout(layoutSiteBuilderLV);
-
-                }
-            }
-        });
-        layoutSiteBuilder.addComponent(editorSelectionList);
-
         backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
         backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
         backToMenuButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 this.setCurrentLayout(layoutMain);
                 siteBuilderTextArea.clear();
-                siteBuilderTFTextArea.clear();
-                siteBuilderLVTextArea.clear();
 
-                //Todo add funtion to check if file is saved when back button is pressed and if not saved see if user would like to save
+                //Todo add function to check if file is saved when back button is pressed and if not saved see if user would like to save
 
                 currentFile = null;
             }
@@ -241,12 +195,7 @@ public class GWBApp extends Application {
         saveAsSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 NBTTagCompound data = new NBTTagCompound();
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                     data.setString("content", siteBuilderTextArea.getText());
-                }
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                    data.setString("content", siteBuilderTFTextArea.getText());
-                }
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                 saveDialog.setFolder(getApplicationFolderPath());
@@ -265,30 +214,16 @@ public class GWBApp extends Application {
             if(mouseButton == 0){
                 if(currentFile != null) {
                     NBTTagCompound data = new NBTTagCompound();
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                         data.setString("content", siteBuilderTextArea.getText());
                         currentFile.setData(data, (v, success) -> {
                             if (success) {
 
                             }
                         });
-                    }
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                        data.setString("content", siteBuilderTFTextArea.getText());
-                        currentFile.setData(data, (v, success) -> {
-                            if (success) {
-
-                            }
-                        });
-                    }
                 }else {
                     NBTTagCompound data = new NBTTagCompound();
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                         data.setString("content", siteBuilderTextArea.getText());
-                    }
-                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                        data.setString("content", siteBuilderTFTextArea.getText());
-                    }
+
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                     saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
@@ -313,13 +248,7 @@ public class GWBApp extends Application {
                 exportDialog.setResponseHandler((success, v) ->
                 {
                     if (success) {
-                        if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
-                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
-                        }
-                        if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
-                        }
-
+                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     }
                     return true;
                 });
@@ -331,37 +260,245 @@ public class GWBApp extends Application {
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
         copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
-                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
+                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
-                }
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                    StringSelection code = new StringSelection(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
-                    clipboard.setContents(code, null);
-                }
                 TaskManager.sendTask(new TaskNotificationCopiedCode());
             }
         });
         layoutSiteBuilder.addComponent(copyToClipboardButton);
 
-        siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 22);
+        liveViewButton = new ButtonToggle(190, 2, Icons.PLAY);
+        liveViewButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+
+            if(mouseButton == 0){
+
+                boolean active = !liveViewButton.isSelected();
+                liveViewButton.setIcon(active ? Icons.STOP : Icons.PLAY);
+                if(active){
+                    rawTextSaved = siteBuilderTextArea.getText();
+                    siteBuilderTextArea.setEditable(false);
+                    siteBuilderTextArea.setWrapText(true);
+                    siteBuilderTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
+                }else {
+                    siteBuilderTextArea.setEditable(true);
+                    siteBuilderTextArea.setWrapText(false);
+                    siteBuilderTextArea.setText(rawTextSaved.replace("\n\n", "\n"));
+                }
+
+            }
+
+        });
+        layoutSiteBuilder.addComponent(liveViewButton);
+
+        siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 40);
         layoutSiteBuilder.addComponent(siteBuilderTextArea);
 
-        /*----------------------------------------------------------------------------------------------------------------------------------------*/
+        //Color Buttons
+        colorBlackButton = new Button(75, 147, 16, 16, TextFormatting.BLACK + "A");
+        colorBlackButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&0");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorBlackButton);
 
-        layoutSiteBuilderTF = new StandardLayout("Text Formatting", 363, 165, this, null);
-        layoutSiteBuilderTF.setIcon(Alphabet.UPPERCASE_A);
-        layoutSiteBuilderTF.setTitle("GitWeb Builder (Site Builder Formatting)");
+        colorDarkBlueButton = new Button(93, 147, 16, 16, TextFormatting.DARK_BLUE + "A");
+        colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&1");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkBlueButton);
 
-        layoutSiteBuilderTF.addComponent(editorSelectionList);
-        layoutSiteBuilderTF.addComponent(backToMenuButton);
-        layoutSiteBuilderTF.addComponent(saveAsSiteButton);
-        layoutSiteBuilderTF.addComponent(saveSiteButton);
-        layoutSiteBuilderTF.addComponent(exportToPastebinButton);
-        layoutSiteBuilderTF.addComponent(copyToClipboardButton);
+        colorDarkGreenButton = new Button(111, 147, 16, 16, TextFormatting.DARK_GREEN + "A");
+        colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&2");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkGreenButton);
 
-        siteBuilderTFTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 40);
-        layoutSiteBuilderTF.addComponent(siteBuilderTFTextArea);
+        colorDarkAquaButton = new Button(129, 147, 16, 16, TextFormatting.DARK_AQUA + "A");
+        colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&3");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkAquaButton);
+
+        colorDarkRedButton = new Button(147, 147, 16, 16, TextFormatting.DARK_RED + "A");
+        colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&4");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkRedButton);
+
+        colorDarkPurpleButton = new Button(165, 147, 16, 16, TextFormatting.DARK_PURPLE + "A");
+        colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&5");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkPurpleButton);
+
+        colorGoldButton = new Button(183, 147, 16, 16, TextFormatting.GOLD + "A");
+        colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&6");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorGoldButton);
+
+        colorGrayButton = new Button(201, 147, 16, 16, TextFormatting.GRAY + "A");
+        colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&7");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorGrayButton);
+
+        colorDarkGrayButton = new Button(219, 147, 16, 16, TextFormatting.DARK_GRAY + "A");
+        colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&8");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorDarkGrayButton);
+
+        colorBlueButton = new Button(237, 147, 16, 16, TextFormatting.BLUE + "A");
+        colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&9");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorBlueButton);
+
+        colorGreenButton = new Button(255, 147, 16, 16, TextFormatting.GREEN + "A");
+        colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&a");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorGreenButton);
+
+        colorAquaButton = new Button(273, 147, 16, 16, TextFormatting.AQUA + "A");
+        colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&b");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorAquaButton);
+
+        colorRedButton = new Button(291, 147, 16, 16, TextFormatting.RED + "A");
+        colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&c");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorRedButton);
+
+        colorLightPurpleButton = new Button(309, 147, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
+        colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&d");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorLightPurpleButton);
+
+        colorYellowButton = new Button(327, 147, 16, 16, TextFormatting.YELLOW + "A");
+        colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&e");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorYellowButton);
+
+        colorWhiteButton = new Button(345, 147, 16, 16, TextFormatting.WHITE + "A");
+        colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&f");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(colorWhiteButton);
+
+
+        //Formatting Button
+        obfuscateButton = new Button(75, 147, 16, 16, TextFormatting.OBFUSCATED + "A");
+        obfuscateButton.setVisible(false);
+        obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&k");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(obfuscateButton);
+
+        boldButton = new Button(93, 147, 16, 16, TextFormatting.BOLD + "A");
+        boldButton.setVisible(false);
+        boldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&l");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(boldButton);
+
+        strikethroughButton = new Button(111, 147, 16, 16, TextFormatting.STRIKETHROUGH + "A");
+        strikethroughButton.setVisible(false);
+        strikethroughButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&m");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(strikethroughButton);
+
+        underlineButton = new Button(129, 147, 16, 16, TextFormatting.UNDERLINE + "A");
+        underlineButton.setVisible(false);
+        underlineButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&n");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(underlineButton);
+
+        italicButton = new Button(147, 147, 16, 16, TextFormatting.ITALIC + "A");
+        italicButton.setVisible(false);
+        italicButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&o");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(italicButton);
+
+        resetButton = new Button(165, 147, 35, 16, "Reset");
+        resetButton.setVisible(false);
+        resetButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                siteBuilderTextArea.writeText("&r");
+                siteBuilderTextArea.setFocused(true);
+            }
+        });
+        layoutSiteBuilder.addComponent(resetButton);
 
         Object[] formattingType = new String[]{"Coloring", "Formatting"};
         textFormattingSelectionList = new ComboBox.List(2, 148, 72, formattingType);
@@ -428,236 +565,8 @@ public class GWBApp extends Application {
                 }
             }
         });
-        layoutSiteBuilderTF.addComponent(textFormattingSelectionList);
+        layoutSiteBuilder.addComponent(textFormattingSelectionList);
 
-
-        //Color Buttons
-        colorBlackButton = new Button(75, 147, 16, 16, TextFormatting.BLACK + "A");
-        colorBlackButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&0");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorBlackButton);
-
-        colorDarkBlueButton = new Button(93, 147, 16, 16, TextFormatting.DARK_BLUE + "A");
-        colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&1");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkBlueButton);
-
-        colorDarkGreenButton = new Button(111, 147, 16, 16, TextFormatting.DARK_GREEN + "A");
-        colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&2");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkGreenButton);
-
-        colorDarkAquaButton = new Button(129, 147, 16, 16, TextFormatting.DARK_AQUA + "A");
-        colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&3");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkAquaButton);
-
-        colorDarkRedButton = new Button(147, 147, 16, 16, TextFormatting.DARK_RED + "A");
-        colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&4");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkRedButton);
-
-        colorDarkPurpleButton = new Button(165, 147, 16, 16, TextFormatting.DARK_PURPLE + "A");
-        colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&5");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkPurpleButton);
-
-        colorGoldButton = new Button(183, 147, 16, 16, TextFormatting.GOLD + "A");
-        colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&6");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorGoldButton);
-
-        colorGrayButton = new Button(201, 147, 16, 16, TextFormatting.GRAY + "A");
-        colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&7");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorGrayButton);
-
-        colorDarkGrayButton = new Button(219, 147, 16, 16, TextFormatting.DARK_GRAY + "A");
-        colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&8");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorDarkGrayButton);
-
-        colorBlueButton = new Button(237, 147, 16, 16, TextFormatting.BLUE + "A");
-        colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&9");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorBlueButton);
-
-        colorGreenButton = new Button(255, 147, 16, 16, TextFormatting.GREEN + "A");
-        colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&a");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorGreenButton);
-
-        colorAquaButton = new Button(273, 147, 16, 16, TextFormatting.AQUA + "A");
-        colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&b");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorAquaButton);
-
-        colorRedButton = new Button(291, 147, 16, 16, TextFormatting.RED + "A");
-        colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&c");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorRedButton);
-
-        colorLightPurpleButton = new Button(309, 147, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
-        colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&d");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorLightPurpleButton);
-
-        colorYellowButton = new Button(327, 147, 16, 16, TextFormatting.YELLOW + "A");
-        colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&e");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorYellowButton);
-
-        colorWhiteButton = new Button(345, 147, 16, 16, TextFormatting.WHITE + "A");
-        colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&f");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(colorWhiteButton);
-
-
-        //Formatting Button
-        obfuscateButton = new Button(75, 147, 16, 16, TextFormatting.OBFUSCATED + "A");
-        obfuscateButton.setVisible(false);
-        obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&k");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(obfuscateButton);
-
-        boldButton = new Button(93, 147, 16, 16, TextFormatting.BOLD + "A");
-        boldButton.setVisible(false);
-        boldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&l");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(boldButton);
-
-        strikethroughButton = new Button(111, 147, 16, 16, TextFormatting.STRIKETHROUGH + "A");
-        strikethroughButton.setVisible(false);
-        strikethroughButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&m");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(strikethroughButton);
-
-        underlineButton = new Button(129, 147, 16, 16, TextFormatting.UNDERLINE + "A");
-        underlineButton.setVisible(false);
-        underlineButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&n");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(underlineButton);
-
-        italicButton = new Button(147, 147, 16, 16, TextFormatting.ITALIC + "A");
-        italicButton.setVisible(false);
-        italicButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&o");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(italicButton);
-
-        resetButton = new Button(165, 147, 35, 16, "Reset");
-        resetButton.setVisible(false);
-        resetButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTFTextArea.writeText("&r");
-                siteBuilderTFTextArea.setFocused(true);
-            }
-        });
-        layoutSiteBuilderTF.addComponent(resetButton);
-
-
-        /*----------------------------------------------------------------------------------------------------------------------------------------*/
-
-        layoutSiteBuilderLV = new StandardLayout("Live View", 363, 165, this, null);
-        layoutSiteBuilderLV.setIcon(Icons.PLAY);
-        layoutSiteBuilderLV.setTitle("GitWeb Builder (Site Builder Live)");
-
-        layoutSiteBuilderLV.addComponent(editorSelectionList);
-        layoutSiteBuilderLV.addComponent(backToMenuButton);
-
-        siteBuilderLVTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 22);
-        siteBuilderLVTextArea.setEditable(false);
-        siteBuilderLVTextArea.setWrapText(true);
-        layoutSiteBuilderLV.addComponent(siteBuilderLVTextArea);
-
-    }
-
-    //Todo make getContent Method to reduce code
-
-    public void getContent(){
 
 
 
@@ -716,6 +625,8 @@ public class GWBApp extends Application {
 
     }
 
+
+
     public String renderLiveView(String content){
 
         return content
@@ -740,37 +651,22 @@ public class GWBApp extends Application {
             if (currentFile != null) {
 
                 NBTTagCompound data = new NBTTagCompound();
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                     data.setString("content", siteBuilderTextArea.getText());
                     currentFile.setData(data, (v, success) -> {
                         if (success) {
 
                         }
                     });
-                }
-                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                    data.setString("content", siteBuilderTFTextArea.getText());
-                    currentFile.setData(data, (v, success) -> {
-                        if (success) {
-
-                        }
-                    });
-                }
-
             }
             characterCounter = 0;
         }
         characterCounter++;
 
+        //Todo add control s to save
+
         if (code == Keyboard.KEY_DELETE) {
-            if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                 siteBuilderTextArea.moveCursorRight(1);
                 siteBuilderTextArea.performBackspace();
-            }
-            if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
-                siteBuilderTFTextArea.moveCursorRight(1);
-                siteBuilderTFTextArea.performBackspace();
-            }
         }
 
     }
