@@ -121,22 +121,6 @@ public class GWBApp extends Application {
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
         layoutMain.setTitle("GitWeb Builder (Menu)");
-        layoutMain.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
-            /*GlStateManager.pushMatrix();
-            {
-                GlStateManager.enableDepth();
-                GlStateManager.disableLighting();
-                GlStateManager.translate(x + 150, y - 20, 250);
-                GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
-                GlStateManager.rotate(5F, 1, 0, 0);
-                GlStateManager.rotate(200F, 0, 0, 1);
-                GlStateManager.rotate(-rotationCounter - 45, 0, 1, 0);
-                mc.getTextureManager().bindTexture(logo);
-                gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
-                GlStateManager.disableDepth();
-            }
-            GlStateManager.popMatrix();*/
-        });
 
         layoutMain.setInitListener(() ->
         {
@@ -217,13 +201,13 @@ public class GWBApp extends Application {
                     this.setCurrentLayout(layoutSiteBuilderTF);
                 }
                 if (newValue.equals("Site Live View")) {
-                    if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                         siteBuilderLVTextArea.clear();
                         //siteBuilderLVTextArea.setText(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
                         siteBuilderTFTextArea.setText(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                     }
-                    if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                         siteBuilderLVTextArea.clear();
                         //siteBuilderLVTextArea.setText(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         siteBuilderLVTextArea.setText(renderLiveView(siteBuilderTFTextArea.getText().replace("\n\n","\n")));
@@ -244,6 +228,9 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.clear();
                 siteBuilderTFTextArea.clear();
                 siteBuilderLVTextArea.clear();
+
+                //Todo add funtion to check if file is saved when back button is pressed and if not saved see if user would like to save
+
                 currentFile = null;
             }
         });
@@ -254,16 +241,17 @@ public class GWBApp extends Application {
         saveAsSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 NBTTagCompound data = new NBTTagCompound();
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                     data.setString("content", siteBuilderTextArea.getText());
                 }
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                     data.setString("content", siteBuilderTFTextArea.getText());
                 }
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                 saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
+                    currentFile = file;
                     return true;
                 });
                 this.openDialog(saveDialog);
@@ -277,7 +265,7 @@ public class GWBApp extends Application {
             if(mouseButton == 0){
                 if(currentFile != null) {
                     NBTTagCompound data = new NBTTagCompound();
-                    if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                         data.setString("content", siteBuilderTextArea.getText());
                         currentFile.setData(data, (v, success) -> {
                             if (success) {
@@ -285,7 +273,7 @@ public class GWBApp extends Application {
                             }
                         });
                     }
-                    if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                    if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                         data.setString("content", siteBuilderTFTextArea.getText());
                         currentFile.setData(data, (v, success) -> {
                             if (success) {
@@ -304,6 +292,7 @@ public class GWBApp extends Application {
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                     saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
+                        currentFile = file;
                         return true;
                     });
                     this.openDialog(saveDialog);
@@ -324,10 +313,10 @@ public class GWBApp extends Application {
                 exportDialog.setResponseHandler((success, v) ->
                 {
                     if (success) {
-                        if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                        if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                             createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         }
-                        if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                        if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                             createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                         }
 
@@ -342,11 +331,11 @@ public class GWBApp extends Application {
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
         copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                     StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
                 }
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                     StringSelection code = new StringSelection(siteBuilderTFTextArea.getText().replace("&", "§").replace("\n\n", "\n"));
                     clipboard.setContents(code, null);
                 }
@@ -668,6 +657,12 @@ public class GWBApp extends Application {
 
     //Todo make getContent Method to reduce code
 
+    public void getContent(){
+
+
+
+    }
+
 
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
@@ -684,7 +679,7 @@ public class GWBApp extends Application {
             {
                 GlStateManager.enableDepth();
                 GlStateManager.disableLighting();
-                GlStateManager.translate(x1 + 150, y1 - 20, 250);
+                GlStateManager.translate(x1 + 150, y1 - 35, 250);
                 GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
                 GlStateManager.rotate(5F, 1, 0, 0);
                 GlStateManager.rotate(200F, 0, 0, 1);
@@ -745,7 +740,7 @@ public class GWBApp extends Application {
             if (currentFile != null) {
 
                 NBTTagCompound data = new NBTTagCompound();
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                     data.setString("content", siteBuilderTextArea.getText());
                     currentFile.setData(data, (v, success) -> {
                         if (success) {
@@ -753,7 +748,7 @@ public class GWBApp extends Application {
                         }
                     });
                 }
-                if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+                if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                     data.setString("content", siteBuilderTFTextArea.getText());
                     currentFile.setData(data, (v, success) -> {
                         if (success) {
@@ -768,11 +763,11 @@ public class GWBApp extends Application {
         characterCounter++;
 
         if (code == Keyboard.KEY_DELETE) {
-            if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder)") {
+            if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder)")) {
                 siteBuilderTextArea.moveCursorRight(1);
                 siteBuilderTextArea.performBackspace();
             }
-            if (this.getCurrentLayout().getTitle() == "GitWeb Builder (Site Builder Formatting)") {
+            if (this.getCurrentLayout().getTitle().equals("GitWeb Builder (Site Builder Formatting)")) {
                 siteBuilderTFTextArea.moveCursorRight(1);
                 siteBuilderTFTextArea.performBackspace();
             }

@@ -15,12 +15,12 @@ public class GWBLogoModel extends ModelBase {
         this.textureWidth = 64;
         this.textureHeight = 32;
         this.logoblock = new ModelRenderer(this, 0, 0);
-        this.logoblock.setRotationPoint(-7.0F, 9.0F, -7.0F);
-        this.logoblock.addBox(0.0F, 0.0F, 0.0F, 14, 14, 14, 0.0F);
+        this.logoblock.setRotationPoint(-6.0F, 12.0F, -6.0F);
+        this.logoblock.addBox(0.0F, 0.0F, 0.0F, 12, 12, 12, 0.0F);
     }
 
     @Override
-    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) { 
+    public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
         this.logoblock.render(f5);
     }
 
