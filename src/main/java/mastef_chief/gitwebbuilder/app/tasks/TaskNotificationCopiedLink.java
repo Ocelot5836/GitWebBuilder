@@ -37,7 +37,7 @@ public class TaskNotificationCopiedLink extends Task {
      */
     @Override
     public void processRequest(NBTTagCompound nbt, World world, EntityPlayer player) {
-        Notification notification = new Notification(Icons.CHAT, TextFormatting.BOLD + "Copied", "Link To Clipboard");
+        Notification notification = new Notification(Icons.COPY, TextFormatting.BOLD + "Copied", "Link To Clipboard");
         notification.pushTo((EntityPlayerMP)player);
     }
 

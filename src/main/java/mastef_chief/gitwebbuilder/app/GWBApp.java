@@ -15,6 +15,9 @@ import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,16 +25,22 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
 
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.*;
 import java.lang.System;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.Key;
 import java.util.function.Predicate;
 
 public class GWBApp extends Application {
@@ -180,11 +189,30 @@ public class GWBApp extends Application {
         backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
         backToMenuButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                this.setCurrentLayout(layoutMain);
-                siteBuilderTextArea.clear();
 
                 //Todo add function to check if file is saved when back button is pressed and if not saved see if user would like to save
+                /*if(currentFile == null && siteBuilderTextArea.getText().isEmpty() == false){
 
+                    NBTTagCompound data = new NBTTagCompound();
+                    data.setString("content", siteBuilderTextArea.getText());
+
+                    Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                    saveDialog.setFolder(getApplicationFolderPath());
+                    saveDialog.setResponseHandler((success, file) -> {
+                        currentFile = file;
+                        return true;
+                    });
+                    this.openDialog(saveDialog);
+                }*/
+
+                this.setCurrentLayout(layoutMain);
+                siteBuilderTextArea.clear();
+                liveViewButton.setSelected(false);
+                liveViewButton.setIcon(Icons.PLAY);
+                saveAsSiteButton.setEnabled(true);
+                saveSiteButton.setEnabled(true);
+                exportToPastebinButton.setEnabled(true);
+                copyToClipboardButton.setEnabled(true);
                 currentFile = null;
             }
         });
@@ -195,7 +223,7 @@ public class GWBApp extends Application {
         saveAsSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 NBTTagCompound data = new NBTTagCompound();
-                    data.setString("content", siteBuilderTextArea.getText());
+                data.setString("content", siteBuilderTextArea.getText());
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                 saveDialog.setFolder(getApplicationFolderPath());
@@ -211,18 +239,18 @@ public class GWBApp extends Application {
         saveSiteButton = new Button(136, 2, Icons.SAVE);
         saveSiteButton.setToolTip("Save", "Saves your site to the current file");
         saveSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
-                if(currentFile != null) {
+            if (mouseButton == 0) {
+                if (currentFile != null) {
                     NBTTagCompound data = new NBTTagCompound();
-                        data.setString("content", siteBuilderTextArea.getText());
-                        currentFile.setData(data, (v, success) -> {
-                            if (success) {
+                    data.setString("content", siteBuilderTextArea.getText());
+                    currentFile.setData(data, (v, success) -> {
+                        if (success) {
 
-                            }
-                        });
-                }else {
+                        }
+                    });
+                } else {
                     NBTTagCompound data = new NBTTagCompound();
-                        data.setString("content", siteBuilderTextArea.getText());
+                    data.setString("content", siteBuilderTextArea.getText());
 
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                     saveDialog.setFolder(getApplicationFolderPath());
@@ -248,7 +276,7 @@ public class GWBApp extends Application {
                 exportDialog.setResponseHandler((success, v) ->
                 {
                     if (success) {
-                            createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("\n\n", "\n"));
+                        createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("\n\n", "\n").replace("&", "%26"));
                     }
                     return true;
                 });
@@ -260,8 +288,8 @@ public class GWBApp extends Application {
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
         copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                    StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("\n\n", "\n"));
-                    clipboard.setContents(code, null);
+                StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("\n\n", "\n"));
+                clipboard.setContents(code, null);
                 TaskManager.sendTask(new TaskNotificationCopiedCode());
             }
         });
@@ -270,19 +298,27 @@ public class GWBApp extends Application {
         liveViewButton = new ButtonToggle(190, 2, Icons.PLAY);
         liveViewButton.setClickListener((mouseX, mouseY, mouseButton) -> {
 
-            if(mouseButton == 0){
+            if (mouseButton == 0) {
 
                 boolean active = !liveViewButton.isSelected();
                 liveViewButton.setIcon(active ? Icons.STOP : Icons.PLAY);
-                if(active){
+                if (active) {
                     rawTextSaved = siteBuilderTextArea.getText();
                     siteBuilderTextArea.setEditable(false);
                     siteBuilderTextArea.setWrapText(true);
                     siteBuilderTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
-                }else {
+                    saveAsSiteButton.setEnabled(false);
+                    saveSiteButton.setEnabled(false);
+                    exportToPastebinButton.setEnabled(false);
+                    copyToClipboardButton.setEnabled(false);
+                } else {
                     siteBuilderTextArea.setEditable(true);
                     siteBuilderTextArea.setWrapText(false);
                     siteBuilderTextArea.setText(rawTextSaved.replace("\n\n", "\n"));
+                    saveAsSiteButton.setEnabled(true);
+                    saveSiteButton.setEnabled(true);
+                    exportToPastebinButton.setEnabled(true);
+                    copyToClipboardButton.setEnabled(true);
                 }
 
             }
@@ -500,6 +536,8 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(resetButton);
 
+        //Todo Add search for code
+
         Object[] formattingType = new String[]{"Coloring", "Formatting"};
         textFormattingSelectionList = new ComboBox.List(2, 148, 72, formattingType);
         textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
@@ -568,10 +606,7 @@ public class GWBApp extends Application {
         layoutSiteBuilder.addComponent(textFormattingSelectionList);
 
 
-
-
     }
-
 
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
@@ -626,20 +661,19 @@ public class GWBApp extends Application {
     }
 
 
-
-    public String renderLiveView(String content){
+    public String renderLiveView(String content) {
 
         return content
                 //new line fix
-                .replace("\n\n","\n")
+                .replace("\n\n", "\n")
                 //color conversion to unicode format
-                .replace("&0","\u00A70").replace("&1","\u00A71").replace("&2","\u00A72").replace("&3","\u00A73")
-                .replace("&4","\u00A74").replace("&5","\u00A75").replace("&6","\u00A76").replace("&7","\u00A77")
-                .replace("&8","\u00A78").replace("&9","\u00A79").replace("&a","\u00A7a").replace("&b","\u00A7b")
-                .replace("&c","\u00A7c").replace("&d","\u00A7d").replace("&e","\u00A7e").replace("&f","\u00A7f")
+                .replace("&0", "\u00A70").replace("&1", "\u00A71").replace("&2", "\u00A72").replace("&3", "\u00A73")
+                .replace("&4", "\u00A74").replace("&5", "\u00A75").replace("&6", "\u00A76").replace("&7", "\u00A77")
+                .replace("&8", "\u00A78").replace("&9", "\u00A79").replace("&a", "\u00A7a").replace("&b", "\u00A7b")
+                .replace("&c", "\u00A7c").replace("&d", "\u00A7d").replace("&e", "\u00A7e").replace("&f", "\u00A7f")
                 //Formatting conversion to unicode format
-                .replace("&k","\u00A7k").replace("&l","\u00A7l").replace("&m","\u00A7m").replace("&n","\u00A7n")
-                .replace("&o","\u00A7o").replace("&r","\u00A7r");
+                .replace("&k", "\u00A7k").replace("&l", "\u00A7l").replace("&m", "\u00A7m").replace("&n", "\u00A7n")
+                .replace("&o", "\u00A7o").replace("&r", "\u00A7r");
 
     }
 
@@ -647,16 +681,58 @@ public class GWBApp extends Application {
     public void handleKeyTyped(char character, int code) {
         super.handleKeyTyped(character, code);
 
-        if (characterCounter == 5) {
-            if (currentFile != null) {
+        if (this.getCurrentLayout() == layoutSiteBuilder) {
+            if (GuiScreen.isCtrlKeyDown() && code == Keyboard.KEY_S) {
 
-                NBTTagCompound data = new NBTTagCompound();
+                if (currentFile != null) {
+                    NBTTagCompound data = new NBTTagCompound();
                     data.setString("content", siteBuilderTextArea.getText());
                     currentFile.setData(data, (v, success) -> {
                         if (success) {
 
                         }
                     });
+                } else {
+                    NBTTagCompound data = new NBTTagCompound();
+                    data.setString("content", siteBuilderTextArea.getText());
+
+                    Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                    saveDialog.setFolder(getApplicationFolderPath());
+                    saveDialog.setResponseHandler((success, file) -> {
+                        currentFile = file;
+                        return true;
+                    });
+                    this.openDialog(saveDialog);
+                }
+            }
+            if (GuiScreen.isCtrlKeyDown() && GuiScreen.isShiftKeyDown() && code == Keyboard.KEY_S) {
+
+                NBTTagCompound data = new NBTTagCompound();
+                data.setString("content", siteBuilderTextArea.getText());
+
+                Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                saveDialog.setFolder(getApplicationFolderPath());
+                saveDialog.setResponseHandler((success, file) -> {
+                    currentFile = file;
+                    return true;
+                });
+                this.openDialog(saveDialog);
+
+            }
+
+        }
+
+
+        if (characterCounter == 5) {
+            if (currentFile != null) {
+
+                NBTTagCompound data = new NBTTagCompound();
+                data.setString("content", siteBuilderTextArea.getText());
+                currentFile.setData(data, (v, success) -> {
+                    if (success) {
+
+                    }
+                });
             }
             characterCounter = 0;
         }
@@ -664,11 +740,19 @@ public class GWBApp extends Application {
 
         //Todo add control s to save
 
+
         if (code == Keyboard.KEY_DELETE) {
-                siteBuilderTextArea.moveCursorRight(1);
-                siteBuilderTextArea.performBackspace();
+            siteBuilderTextArea.moveCursorRight(1);
+            siteBuilderTextArea.performBackspace();
         }
 
+    }
+
+    public void onKeyCombo(KeyEvent e) {
+
+        if (e.isControlDown() && e.getKeyChar() != 'a' && e.getKeyCode() == 65) {
+            System.out.println("Select All");
+        }
     }
 
     @Override
