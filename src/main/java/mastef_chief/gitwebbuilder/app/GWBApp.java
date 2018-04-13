@@ -1,9 +1,10 @@
 package mastef_chief.gitwebbuilder.app;
 
-import com.mrcrayfish.device.api.app.*;
+import com.mrcrayfish.device.api.app.Application;
 import com.mrcrayfish.device.api.app.Dialog;
-import com.mrcrayfish.device.api.app.component.*;
+import com.mrcrayfish.device.api.app.Icons;
 import com.mrcrayfish.device.api.app.component.Button;
+import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.io.File;
@@ -15,32 +16,25 @@ import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
-
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.*;
-import java.lang.System;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.Key;
 import java.util.function.Predicate;
 
 public class GWBApp extends Application {
@@ -124,6 +118,7 @@ public class GWBApp extends Application {
 
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
+
         layoutMain.setTitle("GitWeb Builder (Menu)");
 
         layoutMain.setInitListener(() ->
@@ -610,35 +605,43 @@ public class GWBApp extends Application {
 
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
+
+        partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
+
         super.render(laptop, mc, x, y, mouseX, mouseY, active, partialTicks);
 
-        if (rotationCounter == 360) {
-            rotationCounter = 0;
-        }
 
-        rotationCounter = rotationCounter + 0.5F;
-
-        layoutMain.setBackground((gui, mc1, x1, y1, width, height, mouseX1, mouseY1, windowActive) -> {
+        if (this.getCurrentLayout() == layoutMain) {
             GlStateManager.pushMatrix();
             {
                 GlStateManager.enableDepth();
                 GlStateManager.disableLighting();
-                GlStateManager.translate(x1 + 150, y1 - 35, 250);
+                GlStateManager.translate(x + 150, y - 33, 250);
                 GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
                 GlStateManager.rotate(5F, 1, 0, 0);
                 GlStateManager.rotate(200F, 0, 0, 1);
-                GlStateManager.rotate(-rotationCounter, 0, 1, 0);
-                mc1.getTextureManager().bindTexture(logo);
+                GlStateManager.rotate(-rotationCounter - partialTicks, 0, 1, 0);
+                mc.getTextureManager().bindTexture(logo);
                 gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
                 GlStateManager.disableDepth();
             }
             GlStateManager.popMatrix();
-        });
+        }
+
+    }
+
+    @Override
+    public void onTick() {
+        super.onTick();
+
+        rotationCounter++;
+        rotationCounter %= 360;
 
 
     }
 
     public void createPastebin(String title, String code) {
+        String apikey = "";
         try {
             URL url = new URL("http://mastefchief.com/gwbpb/api/create");
             URLConnection conn = url.openConnection();
@@ -717,9 +720,7 @@ public class GWBApp extends Application {
                     return true;
                 });
                 this.openDialog(saveDialog);
-
             }
-
         }
 
 
@@ -738,20 +739,9 @@ public class GWBApp extends Application {
         }
         characterCounter++;
 
-        //Todo add control s to save
-
-
         if (code == Keyboard.KEY_DELETE) {
             siteBuilderTextArea.moveCursorRight(1);
             siteBuilderTextArea.performBackspace();
-        }
-
-    }
-
-    public void onKeyCombo(KeyEvent e) {
-
-        if (e.isControlDown() && e.getKeyChar() != 'a' && e.getKeyCode() == 65) {
-            System.out.println("Select All");
         }
     }
 
