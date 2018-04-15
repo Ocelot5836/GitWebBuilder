@@ -7,6 +7,7 @@ import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
+import com.mrcrayfish.device.api.app.interfaces.IHighlight;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
 import com.mrcrayfish.device.core.Laptop;
@@ -28,7 +29,6 @@ import org.lwjgl.input.Keyboard;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,6 +41,25 @@ public class GWBApp extends Application {
 
     private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder()
             && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
+
+    public static final IHighlight CODE_HIGHLIGHT = text ->
+    {
+        if(text.startsWith("#"))
+            return asArray(TextFormatting.GREEN);
+
+        if(text.startsWith("\"") && text.endsWith("\""))
+            return asArray(TextFormatting.AQUA);
+
+        switch(text)
+        {
+            case "text":
+            case "image":
+                return asArray(TextFormatting.BLUE);
+            default:
+                return asArray(TextFormatting.WHITE);
+        }
+    };
+
 
     Minecraft mc = Minecraft.getMinecraft();
 
@@ -93,7 +112,7 @@ public class GWBApp extends Application {
     private Button italicButton;
     private Button resetButton;
 
-    private ComboBox.List<String> textFormattingSelectionList;
+    private ItemList<String> textFormattingSelectionList;
 
     private Label descLabel;
 
@@ -118,8 +137,6 @@ public class GWBApp extends Application {
 
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
-
-        layoutMain.setTitle("GitWeb Builder (Menu)");
 
         layoutMain.setInitListener(() ->
         {
@@ -178,7 +195,6 @@ public class GWBApp extends Application {
 
         layoutSiteBuilder = new StandardLayout("Site Builder", 363, 165, this, null);
         layoutSiteBuilder.setIcon(Icons.EARTH);
-        layoutSiteBuilder.setTitle("GitWeb Builder (Site Builder)");
 
         backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
         backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
@@ -186,20 +202,76 @@ public class GWBApp extends Application {
             if (mouseButton == 0) {
 
                 //Todo add function to check if file is saved when back button is pressed and if not saved see if user would like to save
-                /*if(currentFile == null && siteBuilderTextArea.getText().isEmpty() == false){
+                /*if(currentFile == null) {
 
+                    if(!siteBuilderTextArea.getText().isEmpty()){
+                    Dialog.Confirmation dialog = new Dialog.Confirmation("sadsa");
+                    dialog.setPositiveText("Yes");
+                    dialog.setNegativeText("No");
+                    this.openDialog(dialog);
+                    dialog.setPositiveListener((mouseX1, mouseY1, mouseButton1) -> {
+                        if (mouseButton1 == 0) {
+                            NBTTagCompound data = new NBTTagCompound();
+                            data.setString("content", siteBuilderTextArea.getText());
+
+                            Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                            saveDialog.setFolder(getApplicationFolderPath());
+                            saveDialog.setResponseHandler((success, file) -> {
+                                currentFile = file;
+                                this.setCurrentLayout(layoutMain);
+                                siteBuilderTextArea.clear();
+                                liveViewButton.setSelected(false);
+                                liveViewButton.setIcon(Icons.PLAY);
+                                saveAsSiteButton.setEnabled(true);
+                                saveSiteButton.setEnabled(true);
+                                exportToPastebinButton.setEnabled(true);
+                                copyToClipboardButton.setEnabled(true);
+                                return true;
+                            });
+                            this.openDialog(saveDialog);
+                        }
+                    });
+                    dialog.setNegativeListener((mouseX1, mouseY1, mouseButton1) -> {
+                        if (mouseButton1 == 0) {
+                            dialog.close();
+                            this.setCurrentLayout(layoutMain);
+                            siteBuilderTextArea.clear();
+                            liveViewButton.setSelected(false);
+                            liveViewButton.setIcon(Icons.PLAY);
+                            saveAsSiteButton.setEnabled(true);
+                            saveSiteButton.setEnabled(true);
+                            exportToPastebinButton.setEnabled(true);
+                            copyToClipboardButton.setEnabled(true);
+                        }
+                    });
+
+                }else{
+                        this.setCurrentLayout(layoutMain);
+                        siteBuilderTextArea.clear();
+                        liveViewButton.setSelected(false);
+                        liveViewButton.setIcon(Icons.PLAY);
+                        saveAsSiteButton.setEnabled(true);
+                        saveSiteButton.setEnabled(true);
+                        exportToPastebinButton.setEnabled(true);
+                        copyToClipboardButton.setEnabled(true);
+                    }
+                }else{
                     NBTTagCompound data = new NBTTagCompound();
                     data.setString("content", siteBuilderTextArea.getText());
+                    currentFile.setData(data, (v, success) -> {
+                        if (success) {
 
-                    Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                    saveDialog.setFolder(getApplicationFolderPath());
-                    saveDialog.setResponseHandler((success, file) -> {
-                        currentFile = file;
-                        return true;
+                        }
                     });
-                    this.openDialog(saveDialog);
+                    this.setCurrentLayout(layoutMain);
+                    siteBuilderTextArea.clear();
+                    liveViewButton.setSelected(false);
+                    liveViewButton.setIcon(Icons.PLAY);
+                    saveAsSiteButton.setEnabled(true);
+                    saveSiteButton.setEnabled(true);
+                    exportToPastebinButton.setEnabled(true);
+                    copyToClipboardButton.setEnabled(true);
                 }*/
-
                 this.setCurrentLayout(layoutMain);
                 siteBuilderTextArea.clear();
                 liveViewButton.setSelected(false);
@@ -259,7 +331,6 @@ public class GWBApp extends Application {
             }
         });
         layoutSiteBuilder.addComponent(saveSiteButton);
-
         exportToPastebinButton = new Button(154, 2, Icons.EXPORT);
         exportToPastebinButton.setToolTip("Export To  PasteBin", "Exports code to GitWeb Buidler's Pastebin");
         exportToPastebinButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -321,11 +392,12 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(liveViewButton);
 
-        siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 40);
+        siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 55);
+        siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutSiteBuilder.addComponent(siteBuilderTextArea);
 
         //Color Buttons
-        colorBlackButton = new Button(75, 147, 16, 16, TextFormatting.BLACK + "A");
+        colorBlackButton = new Button(75, 140, 16, 16, TextFormatting.BLACK + "A");
         colorBlackButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&0");
@@ -334,7 +406,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorBlackButton);
 
-        colorDarkBlueButton = new Button(93, 147, 16, 16, TextFormatting.DARK_BLUE + "A");
+        colorDarkBlueButton = new Button(93, 140, 16, 16, TextFormatting.DARK_BLUE + "A");
         colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&1");
@@ -343,7 +415,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkBlueButton);
 
-        colorDarkGreenButton = new Button(111, 147, 16, 16, TextFormatting.DARK_GREEN + "A");
+        colorDarkGreenButton = new Button(111, 140, 16, 16, TextFormatting.DARK_GREEN + "A");
         colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&2");
@@ -352,7 +424,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkGreenButton);
 
-        colorDarkAquaButton = new Button(129, 147, 16, 16, TextFormatting.DARK_AQUA + "A");
+        colorDarkAquaButton = new Button(129, 140, 16, 16, TextFormatting.DARK_AQUA + "A");
         colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&3");
@@ -361,7 +433,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkAquaButton);
 
-        colorDarkRedButton = new Button(147, 147, 16, 16, TextFormatting.DARK_RED + "A");
+        colorDarkRedButton = new Button(147, 140, 16, 16, TextFormatting.DARK_RED + "A");
         colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&4");
@@ -370,7 +442,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkRedButton);
 
-        colorDarkPurpleButton = new Button(165, 147, 16, 16, TextFormatting.DARK_PURPLE + "A");
+        colorDarkPurpleButton = new Button(165, 140, 16, 16, TextFormatting.DARK_PURPLE + "A");
         colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&5");
@@ -379,7 +451,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkPurpleButton);
 
-        colorGoldButton = new Button(183, 147, 16, 16, TextFormatting.GOLD + "A");
+        colorGoldButton = new Button(183, 140, 16, 16, TextFormatting.GOLD + "A");
         colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&6");
@@ -388,7 +460,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorGoldButton);
 
-        colorGrayButton = new Button(201, 147, 16, 16, TextFormatting.GRAY + "A");
+        colorGrayButton = new Button(201, 140, 16, 16, TextFormatting.GRAY + "A");
         colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&7");
@@ -397,7 +469,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorGrayButton);
 
-        colorDarkGrayButton = new Button(219, 147, 16, 16, TextFormatting.DARK_GRAY + "A");
+        colorDarkGrayButton = new Button(219, 140, 16, 16, TextFormatting.DARK_GRAY + "A");
         colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&8");
@@ -406,7 +478,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorDarkGrayButton);
 
-        colorBlueButton = new Button(237, 147, 16, 16, TextFormatting.BLUE + "A");
+        colorBlueButton = new Button(237, 140, 16, 16, TextFormatting.BLUE + "A");
         colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&9");
@@ -415,7 +487,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorBlueButton);
 
-        colorGreenButton = new Button(255, 147, 16, 16, TextFormatting.GREEN + "A");
+        colorGreenButton = new Button(255, 140, 16, 16, TextFormatting.GREEN + "A");
         colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&a");
@@ -424,7 +496,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorGreenButton);
 
-        colorAquaButton = new Button(273, 147, 16, 16, TextFormatting.AQUA + "A");
+        colorAquaButton = new Button(273, 140, 16, 16, TextFormatting.AQUA + "A");
         colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&b");
@@ -433,7 +505,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorAquaButton);
 
-        colorRedButton = new Button(291, 147, 16, 16, TextFormatting.RED + "A");
+        colorRedButton = new Button(291, 140, 16, 16, TextFormatting.RED + "A");
         colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&c");
@@ -442,7 +514,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorRedButton);
 
-        colorLightPurpleButton = new Button(309, 147, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
+        colorLightPurpleButton = new Button(309, 140, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
         colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&d");
@@ -451,7 +523,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorLightPurpleButton);
 
-        colorYellowButton = new Button(327, 147, 16, 16, TextFormatting.YELLOW + "A");
+        colorYellowButton = new Button(327, 140, 16, 16, TextFormatting.YELLOW + "A");
         colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&e");
@@ -460,7 +532,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(colorYellowButton);
 
-        colorWhiteButton = new Button(345, 147, 16, 16, TextFormatting.WHITE + "A");
+        colorWhiteButton = new Button(345, 140, 16, 16, TextFormatting.WHITE + "A");
         colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&f");
@@ -471,7 +543,7 @@ public class GWBApp extends Application {
 
 
         //Formatting Button
-        obfuscateButton = new Button(75, 147, 16, 16, TextFormatting.OBFUSCATED + "A");
+        obfuscateButton = new Button(75, 140, 16, 16, TextFormatting.OBFUSCATED + "A");
         obfuscateButton.setVisible(false);
         obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -481,7 +553,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(obfuscateButton);
 
-        boldButton = new Button(93, 147, 16, 16, TextFormatting.BOLD + "A");
+        boldButton = new Button(93, 140, 16, 16, TextFormatting.BOLD + "A");
         boldButton.setVisible(false);
         boldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -491,7 +563,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(boldButton);
 
-        strikethroughButton = new Button(111, 147, 16, 16, TextFormatting.STRIKETHROUGH + "A");
+        strikethroughButton = new Button(111, 140, 16, 16, TextFormatting.STRIKETHROUGH + "A");
         strikethroughButton.setVisible(false);
         strikethroughButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -501,7 +573,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(strikethroughButton);
 
-        underlineButton = new Button(129, 147, 16, 16, TextFormatting.UNDERLINE + "A");
+        underlineButton = new Button(129, 140, 16, 16, TextFormatting.UNDERLINE + "A");
         underlineButton.setVisible(false);
         underlineButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -511,7 +583,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(underlineButton);
 
-        italicButton = new Button(147, 147, 16, 16, TextFormatting.ITALIC + "A");
+        italicButton = new Button(147, 140, 16, 16, TextFormatting.ITALIC + "A");
         italicButton.setVisible(false);
         italicButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -521,7 +593,7 @@ public class GWBApp extends Application {
         });
         layoutSiteBuilder.addComponent(italicButton);
 
-        resetButton = new Button(165, 147, 35, 16, "Reset");
+        resetButton = new Button(165, 140, 35, 16, "Reset");
         resetButton.setVisible(false);
         resetButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
@@ -533,12 +605,16 @@ public class GWBApp extends Application {
 
         //Todo Add search for code
 
-        Object[] formattingType = new String[]{"Coloring", "Formatting"};
-        textFormattingSelectionList = new ComboBox.List(2, 148, 72, formattingType);
-        textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
-            if (newValue != oldValue) {
-                if (newValue.equals("Coloring")) {
+        textFormattingSelectionList = new ItemList<String>(2, 133, 72, 2);
+        textFormattingSelectionList.addItem("Coloring");
+        textFormattingSelectionList.addItem("Formatting");
+        textFormattingSelectionList.addItem("Modules");
+        textFormattingSelectionList.setSelectedIndex(0);
+        textFormattingSelectionList.setItemClickListener((e, index, mouseButton) -> {
 
+            if (mouseButton == 0) {
+
+                if (e == "Coloring") {
                     //Set Formatting Buttons Visible to false
                     obfuscateButton.setVisible(false);
                     boldButton.setVisible(false);
@@ -565,10 +641,9 @@ public class GWBApp extends Application {
                     colorLightPurpleButton.setVisible(true);
                     colorYellowButton.setVisible(true);
                     colorWhiteButton.setVisible(true);
-
                 }
-                if (newValue.equals("Formatting")) {
 
+                if (e == "Formatting") {
                     //Set Formatting Buttons Visible to true
                     obfuscateButton.setVisible(true);
                     boldButton.setVisible(true);
@@ -594,9 +669,10 @@ public class GWBApp extends Application {
                     colorLightPurpleButton.setVisible(false);
                     colorYellowButton.setVisible(false);
                     colorWhiteButton.setVisible(false);
-
                 }
+
             }
+
         });
         layoutSiteBuilder.addComponent(textFormattingSelectionList);
 
@@ -764,6 +840,11 @@ public class GWBApp extends Application {
     public void onClose() {
         super.onClose();
         currentFile = null;
+    }
+
+    private static <T extends Object> T[] asArray(T ... t)
+    {
+        return t;
     }
 
     /**
