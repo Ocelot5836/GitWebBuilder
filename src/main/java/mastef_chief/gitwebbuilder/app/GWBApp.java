@@ -75,7 +75,8 @@ public class GWBApp extends Application {
     private String rawTextSaved = "";
 
     private StandardLayout layoutMain;
-    private StandardLayout layoutSiteBuilder;
+    private StandardLayout layoutSiteBuilder;//Todo change to layoutCodeView
+    //Todo 2 new layouts called layoutDesingView and layoutLiveView
 
     private Button newSiteButton;
     private Button loadSiteButton;
