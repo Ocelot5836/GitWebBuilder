@@ -19,6 +19,7 @@ import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -134,7 +135,6 @@ public class GWBApp extends Application {
     @Override
     public void init() {
         /*--------------------------------------------------------------------------*/
-
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
 
@@ -691,7 +691,7 @@ public class GWBApp extends Application {
             GlStateManager.pushMatrix();
             {
                 GlStateManager.enableDepth();
-                GlStateManager.disableLighting();
+                RenderHelper.enableStandardItemLighting();
                 GlStateManager.translate(x + 150, y - 33, 250);
                 GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
                 GlStateManager.rotate(5F, 1, 0, 0);
@@ -699,7 +699,9 @@ public class GWBApp extends Application {
                 GlStateManager.rotate(-rotationCounter - partialTicks, 0, 1, 0);
                 mc.getTextureManager().bindTexture(logo);
                 gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
+                RenderHelper.disableStandardItemLighting();
                 GlStateManager.disableDepth();
+
             }
             GlStateManager.popMatrix();
         }
