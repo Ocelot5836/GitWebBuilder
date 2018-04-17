@@ -3,8 +3,8 @@ package mastef_chief.gitwebbuilder.app;
 import com.mrcrayfish.device.api.app.Application;
 import com.mrcrayfish.device.api.app.Dialog;
 import com.mrcrayfish.device.api.app.Icons;
-import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.*;
+import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.interfaces.IHighlight;
@@ -75,7 +75,9 @@ public class GWBApp extends Application {
     private String rawTextSaved = "";
 
     private StandardLayout layoutMain;
-    private StandardLayout layoutSiteBuilder;//Todo change to layoutCodeView
+    private StandardLayout layoutCodeView;
+    private StandardLayout layoutDesignView;
+    private StandardLayout layoutLiveView;
     //Todo 2 new layouts called layoutDesingView and layoutLiveView
 
     private Button newSiteButton;
@@ -118,6 +120,10 @@ public class GWBApp extends Application {
 
     private Label descLabel;
 
+    private CheckBox codeViewCheckBox;
+    private CheckBox designViewCheckBox;
+    private CheckBox liveViewCheckBox;
+
     private TextArea siteBuilderTextArea;
 
     private GWBLogoModel gwbLogoModel = new GWBLogoModel();
@@ -157,7 +163,7 @@ public class GWBApp extends Application {
         newSiteButton = new Button(250, 65, 75, 16, "New Site", Icons.NEW_FILE);
         newSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                this.setCurrentLayout(layoutSiteBuilder);
+                this.setCurrentLayout(layoutCodeView);
                 siteBuilderTextArea.setFocused(true);
             }
         });
@@ -173,7 +179,7 @@ public class GWBApp extends Application {
                         NBTTagCompound data = file.getData();
                         siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
                         currentFile = file;
-                        this.setCurrentLayout(layoutSiteBuilder);
+                        this.setCurrentLayout(layoutCodeView);
                         return true;
                     } else {
                         Dialog.Message errorDialog = new Dialog.Message("Invalid file for GitWeb Builder");
@@ -194,8 +200,8 @@ public class GWBApp extends Application {
 
         /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
-        layoutSiteBuilder = new StandardLayout("Site Builder", 363, 165, this, null);
-        layoutSiteBuilder.setIcon(Icons.EARTH);
+        layoutCodeView = new StandardLayout("Code View", 363, 165, this, null);
+        layoutCodeView.setIcon(Icons.EARTH);
 
         backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
         backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
@@ -216,7 +222,7 @@ public class GWBApp extends Application {
                             data.setString("content", siteBuilderTextArea.getText());
 
                             Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                            saveDialog.setFolder(getApplicationFolderPath());
+
                             saveDialog.setResponseHandler((success, file) -> {
                                 currentFile = file;
                                 this.setCurrentLayout(layoutMain);
@@ -284,7 +290,7 @@ public class GWBApp extends Application {
                 currentFile = null;
             }
         });
-        layoutSiteBuilder.addComponent(backToMenuButton);
+        layoutCodeView.addComponent(backToMenuButton);
 
         saveAsSiteButton = new Button(118, 2, Icons.SAVE);
         saveAsSiteButton.setToolTip("Save As", "Saves your site to a new file");
@@ -294,7 +300,7 @@ public class GWBApp extends Application {
                 data.setString("content", siteBuilderTextArea.getText());
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                saveDialog.setFolder(getApplicationFolderPath());
+
                 saveDialog.setResponseHandler((success, file) -> {
                     currentFile = file;
                     return true;
@@ -302,7 +308,7 @@ public class GWBApp extends Application {
                 this.openDialog(saveDialog);
             }
         });
-        layoutSiteBuilder.addComponent(saveAsSiteButton);
+        layoutCodeView.addComponent(saveAsSiteButton);
 
         saveSiteButton = new Button(136, 2, Icons.SAVE);
         saveSiteButton.setToolTip("Save", "Saves your site to the current file");
@@ -321,7 +327,7 @@ public class GWBApp extends Application {
                     data.setString("content", siteBuilderTextArea.getText());
 
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                    saveDialog.setFolder(getApplicationFolderPath());
+
                     saveDialog.setResponseHandler((success, file) -> {
                         currentFile = file;
                         return true;
@@ -331,7 +337,7 @@ public class GWBApp extends Application {
 
             }
         });
-        layoutSiteBuilder.addComponent(saveSiteButton);
+        layoutCodeView.addComponent(saveSiteButton);
         exportToPastebinButton = new Button(154, 2, Icons.EXPORT);
         exportToPastebinButton.setToolTip("Export To  PasteBin", "Exports code to GitWeb Buidler's Pastebin");
         exportToPastebinButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -349,7 +355,7 @@ public class GWBApp extends Application {
                 });
             }
         });
-        layoutSiteBuilder.addComponent(exportToPastebinButton);
+        layoutCodeView.addComponent(exportToPastebinButton);
 
         copyToClipboardButton = new Button(172, 2, Icons.COPY);
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
@@ -360,7 +366,7 @@ public class GWBApp extends Application {
                 TaskManager.sendTask(new TaskNotificationCopiedCode());
             }
         });
-        layoutSiteBuilder.addComponent(copyToClipboardButton);
+        layoutCodeView.addComponent(copyToClipboardButton);
 
         liveViewButton = new ButtonToggle(190, 2, Icons.PLAY);
         liveViewButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -391,11 +397,49 @@ public class GWBApp extends Application {
             }
 
         });
-        layoutSiteBuilder.addComponent(liveViewButton);
+        layoutCodeView.addComponent(liveViewButton);
 
-        siteBuilderTextArea = new TextArea(0, 21, layoutSiteBuilder.width, layoutSiteBuilder.height - 55);
+        RadioGroup viewGroup = new RadioGroup();
+
+        codeViewCheckBox = new CheckBox("Code", 240, 5);
+        codeViewCheckBox.setSelected(true);
+        codeViewCheckBox.setRadioGroup(viewGroup);
+        codeViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if(mouseButton == 0){
+
+                this.setCurrentLayout(layoutCodeView);
+
+            }
+        });
+        layoutCodeView.addComponent(codeViewCheckBox);
+
+        designViewCheckBox = new CheckBox("Design", 280, 5);
+        designViewCheckBox.setRadioGroup(viewGroup);
+        designViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if(mouseButton == 0){
+
+                this.setCurrentLayout(layoutDesignView);
+
+            }
+        });
+        layoutCodeView.addComponent(designViewCheckBox);
+
+        liveViewCheckBox = new CheckBox("Live", 327, 5);
+        liveViewCheckBox.setRadioGroup(viewGroup);
+        liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if(mouseButton == 0){
+
+                this.setCurrentLayout(layoutLiveView);
+
+            }
+        });
+        layoutCodeView.addComponent(liveViewCheckBox);
+
+
+
+        siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width, layoutCodeView.height - 55);
         siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
-        layoutSiteBuilder.addComponent(siteBuilderTextArea);
+        layoutCodeView.addComponent(siteBuilderTextArea);
 
         //Color Buttons
         colorBlackButton = new Button(75, 140, 16, 16, TextFormatting.BLACK + "A");
@@ -405,7 +449,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorBlackButton);
+        layoutCodeView.addComponent(colorBlackButton);
 
         colorDarkBlueButton = new Button(93, 140, 16, 16, TextFormatting.DARK_BLUE + "A");
         colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -414,7 +458,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkBlueButton);
+        layoutCodeView.addComponent(colorDarkBlueButton);
 
         colorDarkGreenButton = new Button(111, 140, 16, 16, TextFormatting.DARK_GREEN + "A");
         colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -423,7 +467,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkGreenButton);
+        layoutCodeView.addComponent(colorDarkGreenButton);
 
         colorDarkAquaButton = new Button(129, 140, 16, 16, TextFormatting.DARK_AQUA + "A");
         colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -432,7 +476,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkAquaButton);
+        layoutCodeView.addComponent(colorDarkAquaButton);
 
         colorDarkRedButton = new Button(147, 140, 16, 16, TextFormatting.DARK_RED + "A");
         colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -441,7 +485,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkRedButton);
+        layoutCodeView.addComponent(colorDarkRedButton);
 
         colorDarkPurpleButton = new Button(165, 140, 16, 16, TextFormatting.DARK_PURPLE + "A");
         colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -450,7 +494,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkPurpleButton);
+        layoutCodeView.addComponent(colorDarkPurpleButton);
 
         colorGoldButton = new Button(183, 140, 16, 16, TextFormatting.GOLD + "A");
         colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -459,7 +503,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorGoldButton);
+        layoutCodeView.addComponent(colorGoldButton);
 
         colorGrayButton = new Button(201, 140, 16, 16, TextFormatting.GRAY + "A");
         colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -468,7 +512,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorGrayButton);
+        layoutCodeView.addComponent(colorGrayButton);
 
         colorDarkGrayButton = new Button(219, 140, 16, 16, TextFormatting.DARK_GRAY + "A");
         colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -477,7 +521,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorDarkGrayButton);
+        layoutCodeView.addComponent(colorDarkGrayButton);
 
         colorBlueButton = new Button(237, 140, 16, 16, TextFormatting.BLUE + "A");
         colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -486,7 +530,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorBlueButton);
+        layoutCodeView.addComponent(colorBlueButton);
 
         colorGreenButton = new Button(255, 140, 16, 16, TextFormatting.GREEN + "A");
         colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -495,7 +539,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorGreenButton);
+        layoutCodeView.addComponent(colorGreenButton);
 
         colorAquaButton = new Button(273, 140, 16, 16, TextFormatting.AQUA + "A");
         colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -504,7 +548,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorAquaButton);
+        layoutCodeView.addComponent(colorAquaButton);
 
         colorRedButton = new Button(291, 140, 16, 16, TextFormatting.RED + "A");
         colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -513,7 +557,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorRedButton);
+        layoutCodeView.addComponent(colorRedButton);
 
         colorLightPurpleButton = new Button(309, 140, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
         colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -522,7 +566,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorLightPurpleButton);
+        layoutCodeView.addComponent(colorLightPurpleButton);
 
         colorYellowButton = new Button(327, 140, 16, 16, TextFormatting.YELLOW + "A");
         colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -531,7 +575,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorYellowButton);
+        layoutCodeView.addComponent(colorYellowButton);
 
         colorWhiteButton = new Button(345, 140, 16, 16, TextFormatting.WHITE + "A");
         colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -540,7 +584,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(colorWhiteButton);
+        layoutCodeView.addComponent(colorWhiteButton);
 
 
         //Formatting Button
@@ -552,7 +596,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(obfuscateButton);
+        layoutCodeView.addComponent(obfuscateButton);
 
         boldButton = new Button(93, 140, 16, 16, TextFormatting.BOLD + "A");
         boldButton.setVisible(false);
@@ -562,7 +606,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(boldButton);
+        layoutCodeView.addComponent(boldButton);
 
         strikethroughButton = new Button(111, 140, 16, 16, TextFormatting.STRIKETHROUGH + "A");
         strikethroughButton.setVisible(false);
@@ -572,7 +616,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(strikethroughButton);
+        layoutCodeView.addComponent(strikethroughButton);
 
         underlineButton = new Button(129, 140, 16, 16, TextFormatting.UNDERLINE + "A");
         underlineButton.setVisible(false);
@@ -582,7 +626,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(underlineButton);
+        layoutCodeView.addComponent(underlineButton);
 
         italicButton = new Button(147, 140, 16, 16, TextFormatting.ITALIC + "A");
         italicButton.setVisible(false);
@@ -592,7 +636,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(italicButton);
+        layoutCodeView.addComponent(italicButton);
 
         resetButton = new Button(165, 140, 35, 16, "Reset");
         resetButton.setVisible(false);
@@ -602,7 +646,7 @@ public class GWBApp extends Application {
                 siteBuilderTextArea.setFocused(true);
             }
         });
-        layoutSiteBuilder.addComponent(resetButton);
+        layoutCodeView.addComponent(resetButton);
 
         //Todo Add search for code
 
@@ -675,8 +719,26 @@ public class GWBApp extends Application {
             }
 
         });
-        layoutSiteBuilder.addComponent(textFormattingSelectionList);
+        layoutCodeView.addComponent(textFormattingSelectionList);
 
+        /*---------------------------------------------------------------------------------------------------------------*/
+
+        layoutDesignView = new StandardLayout("Design View", 363, 165, this, null);
+        layoutDesignView.setIcon(Icons.EDIT);
+
+        layoutDesignView.addComponent(codeViewCheckBox);
+        layoutDesignView.addComponent(designViewCheckBox);
+        layoutDesignView.addComponent(liveViewCheckBox);
+
+
+        /*---------------------------------------------------------------------------------------------------------------*/
+
+        layoutLiveView = new StandardLayout("Live View", 363, 165, this, null);
+        layoutLiveView.setIcon(Icons.PLAY);
+
+        layoutLiveView.addComponent(codeViewCheckBox);
+        layoutLiveView.addComponent(designViewCheckBox);
+        layoutLiveView.addComponent(liveViewCheckBox);
 
     }
 
@@ -763,7 +825,7 @@ public class GWBApp extends Application {
     public void handleKeyTyped(char character, int code) {
         super.handleKeyTyped(character, code);
 
-        if (this.getCurrentLayout() == layoutSiteBuilder) {
+        if (this.getCurrentLayout() == layoutCodeView) {
             if (GuiScreen.isCtrlKeyDown() && code == Keyboard.KEY_S) {
 
                 if (currentFile != null) {
@@ -779,7 +841,6 @@ public class GWBApp extends Application {
                     data.setString("content", siteBuilderTextArea.getText());
 
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                    saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
                         currentFile = file;
                         return true;
@@ -793,7 +854,6 @@ public class GWBApp extends Application {
                 data.setString("content", siteBuilderTextArea.getText());
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-                saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
                     currentFile = file;
                     return true;
@@ -833,7 +893,7 @@ public class GWBApp extends Application {
 
         NBTTagCompound data = file.getData();
         siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
-        this.setCurrentLayout(layoutSiteBuilder);
+        this.setCurrentLayout(layoutCodeView);
 
         return true;
 
