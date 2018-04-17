@@ -33,12 +33,12 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-repositories {
+/*repositories {
     maven { url = "https://mrcrayfish.com/maven" }
-}
+}*/
 
 dependencies {
-    compile "com.mrcrayfish:device-api:0.3.1-1.12.2"
+//    compile "com.mrcrayfish:device-api:0.3.1-1.12.2"
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"

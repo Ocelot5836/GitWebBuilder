@@ -12,6 +12,7 @@ import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
+import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
@@ -66,6 +67,8 @@ public class GWBApp extends Application {
 
     Toolkit toolkit = Toolkit.getDefaultToolkit();
     Clipboard clipboard = toolkit.getSystemClipboard();
+
+    private GitWebFrame liveGitWebFrame;
 
     private float rotationCounter = 0;
     private int characterCounter = 0;
@@ -429,6 +432,7 @@ public class GWBApp extends Application {
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
             if(mouseButton == 0){
 
+                liveGitWebFrame.loadRaw(siteBuilderTextArea.getText());
                 this.setCurrentLayout(layoutLiveView);
 
             }
@@ -739,6 +743,9 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(codeViewCheckBox);
         layoutLiveView.addComponent(designViewCheckBox);
         layoutLiveView.addComponent(liveViewCheckBox);
+
+        liveGitWebFrame = new GitWebFrame(this, 0, 21,  layoutCodeView.width, layoutCodeView.height - 23);
+        layoutLiveView.addComponent(liveGitWebFrame);
 
     }
 
