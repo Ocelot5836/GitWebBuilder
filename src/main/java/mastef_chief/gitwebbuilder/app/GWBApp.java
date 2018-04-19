@@ -41,6 +41,8 @@ import java.util.function.Predicate;
 
 public class GWBApp extends Application {
 
+    //Todo module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
+
     private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder()
             && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
 
@@ -81,7 +83,6 @@ public class GWBApp extends Application {
     private StandardLayout layoutCodeView;
     private StandardLayout layoutDesignView;
     private StandardLayout layoutLiveView;
-    //Todo 2 new layouts called layoutDesingView and layoutLiveView
 
     private Button newSiteButton;
     private Button loadSiteButton;
@@ -90,8 +91,6 @@ public class GWBApp extends Application {
     private Button exportToPastebinButton;
     private Button saveSiteButton;
     private Button copyToClipboardButton;
-
-    private ButtonToggle liveViewButton;
 
     //16 Color Buttons
     private Button colorBlackButton;
@@ -230,8 +229,6 @@ public class GWBApp extends Application {
                                 currentFile = file;
                                 this.setCurrentLayout(layoutMain);
                                 siteBuilderTextArea.clear();
-                                liveViewButton.setSelected(false);
-                                liveViewButton.setIcon(Icons.PLAY);
                                 saveAsSiteButton.setEnabled(true);
                                 saveSiteButton.setEnabled(true);
                                 exportToPastebinButton.setEnabled(true);
@@ -246,8 +243,6 @@ public class GWBApp extends Application {
                             dialog.close();
                             this.setCurrentLayout(layoutMain);
                             siteBuilderTextArea.clear();
-                            liveViewButton.setSelected(false);
-                            liveViewButton.setIcon(Icons.PLAY);
                             saveAsSiteButton.setEnabled(true);
                             saveSiteButton.setEnabled(true);
                             exportToPastebinButton.setEnabled(true);
@@ -258,8 +253,6 @@ public class GWBApp extends Application {
                 }else{
                         this.setCurrentLayout(layoutMain);
                         siteBuilderTextArea.clear();
-                        liveViewButton.setSelected(false);
-                        liveViewButton.setIcon(Icons.PLAY);
                         saveAsSiteButton.setEnabled(true);
                         saveSiteButton.setEnabled(true);
                         exportToPastebinButton.setEnabled(true);
@@ -275,8 +268,6 @@ public class GWBApp extends Application {
                     });
                     this.setCurrentLayout(layoutMain);
                     siteBuilderTextArea.clear();
-                    liveViewButton.setSelected(false);
-                    liveViewButton.setIcon(Icons.PLAY);
                     saveAsSiteButton.setEnabled(true);
                     saveSiteButton.setEnabled(true);
                     exportToPastebinButton.setEnabled(true);
@@ -284,8 +275,6 @@ public class GWBApp extends Application {
                 }*/
                 this.setCurrentLayout(layoutMain);
                 siteBuilderTextArea.clear();
-                //liveViewButton.setSelected(false);
-                //liveViewButton.setIcon(Icons.PLAY);
                 saveAsSiteButton.setEnabled(true);
                 saveSiteButton.setEnabled(true);
                 exportToPastebinButton.setEnabled(true);
@@ -371,37 +360,6 @@ public class GWBApp extends Application {
         });
         layoutCodeView.addComponent(copyToClipboardButton);
 
-        /*liveViewButton = new ButtonToggle(190, 2, Icons.PLAY);
-        liveViewButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-
-            if (mouseButton == 0) {
-
-                boolean active = !liveViewButton.isSelected();
-                liveViewButton.setIcon(active ? Icons.STOP : Icons.PLAY);
-                if (active) {
-                    rawTextSaved = siteBuilderTextArea.getText();
-                    siteBuilderTextArea.setEditable(false);
-                    siteBuilderTextArea.setWrapText(true);
-                    siteBuilderTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
-                    saveAsSiteButton.setEnabled(false);
-                    saveSiteButton.setEnabled(false);
-                    exportToPastebinButton.setEnabled(false);
-                    copyToClipboardButton.setEnabled(false);
-                } else {
-                    siteBuilderTextArea.setEditable(true);
-                    siteBuilderTextArea.setWrapText(false);
-                    siteBuilderTextArea.setText(rawTextSaved.replace("\n\n", "\n"));
-                    saveAsSiteButton.setEnabled(true);
-                    saveSiteButton.setEnabled(true);
-                    exportToPastebinButton.setEnabled(true);
-                    copyToClipboardButton.setEnabled(true);
-                }
-
-            }
-
-        });
-        layoutCodeView.addComponent(liveViewButton);*/
-
         RadioGroup viewGroup = new RadioGroup();
 
         codeViewCheckBox = new CheckBox("Code", 240, 5);
@@ -432,6 +390,7 @@ public class GWBApp extends Application {
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
             if(mouseButton == 0){
 
+                //liveGitWebFrame.loadUrl("http://mastefchief.com/test/");
                 liveGitWebFrame.loadRaw(renderLiveView(siteBuilderTextArea.getText()));
                 this.setCurrentLayout(layoutLiveView);
 
@@ -440,10 +399,10 @@ public class GWBApp extends Application {
         layoutCodeView.addComponent(liveViewCheckBox);
 
         siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 93, layoutCodeView.height - 22);
-        siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
+        //siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
-        Object[] formattingType = new String[]{"Coloring", "Formatting", "Modules"};
+        Object[] formattingType = new String[]{"Coloring", "Formatting"};
         textFormattingSelectionList = new ComboBox.List(272, 23, 88, formattingType);
         textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
                     if (newValue != oldValue) {
@@ -503,35 +462,6 @@ public class GWBApp extends Application {
                             colorLightPurpleButton.setVisible(false);
                             colorYellowButton.setVisible(false);
                             colorWhiteButton.setVisible(false);
-                        }
-                        if (newValue.equals("Modules")) {
-
-                            //Set Formatting Buttons Visible to false
-                            obfuscateButton.setVisible(false);
-                            boldButton.setVisible(false);
-                            strikethroughButton.setVisible(false);
-                            underlineButton.setVisible(false);
-                            italicButton.setVisible(false);
-                            resetButton.setVisible(false);
-
-                            //Set Color Buttons Visible to false
-                            colorBlackButton.setVisible(false);
-                            colorDarkBlueButton.setVisible(false);
-                            colorDarkGreenButton.setVisible(false);
-                            colorDarkAquaButton.setVisible(false);
-                            colorDarkRedButton.setVisible(false);
-                            colorDarkPurpleButton.setVisible(false);
-                            colorGoldButton.setVisible(false);
-                            colorGrayButton.setVisible(false);
-                            colorDarkGrayButton.setVisible(false);
-                            colorBlueButton.setVisible(false);
-                            colorGreenButton.setVisible(false);
-                            colorAquaButton.setVisible(false);
-                            colorRedButton.setVisible(false);
-                            colorLightPurpleButton.setVisible(false);
-                            colorYellowButton.setVisible(false);
-                            colorWhiteButton.setVisible(false);
-
                         }
                     }
                 }
