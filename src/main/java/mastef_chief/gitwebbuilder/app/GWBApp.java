@@ -442,7 +442,7 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(designViewCheckBox);
         layoutLiveView.addComponent(liveViewCheckBox);
 
-        liveGitWebFrame = new GitWebFrame(this, 0, 21,  layoutCodeView.width, layoutCodeView.height - 23);
+        liveGitWebFrame = new GitWebFrame(this, 0, 21,  layoutCodeView.width, layoutCodeView.height - 22);
         layoutLiveView.addComponent(liveGitWebFrame);
 
     }
