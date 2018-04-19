@@ -595,6 +595,7 @@ public class GWBApp extends Application {
         if (!PREDICATE_FILE_SITE.test(file))
             return false;
 
+        currentFile = file;
 
         NBTTagCompound data = file.getData();
         siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
