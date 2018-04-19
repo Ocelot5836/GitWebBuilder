@@ -8,7 +8,6 @@ import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.interfaces.IHighlight;
-import com.mrcrayfish.device.api.app.listener.ClickListener;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
 import com.mrcrayfish.device.core.Laptop;
@@ -41,6 +40,8 @@ import java.net.URLConnection;
 import java.util.function.Predicate;
 
 public class GWBApp extends Application {
+
+    //Todo module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
 
     private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder()
             && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
@@ -80,7 +81,6 @@ public class GWBApp extends Application {
     private StandardLayout layoutCodeView;
     private StandardLayout layoutDesignView;
     private StandardLayout layoutLiveView;
-    //Todo 2 new layouts called layoutDesingView and layoutLiveView
 
     private Button newSiteButton;
     private Button loadSiteButton;
@@ -89,8 +89,6 @@ public class GWBApp extends Application {
     private Button exportToPastebinButton;
     private Button saveSiteButton;
     private Button copyToClipboardButton;
-
-    private ButtonToggle liveViewButton;
 
     //16 Color Buttons
     private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
@@ -209,8 +207,6 @@ public class GWBApp extends Application {
                                 currentFile = file;
                                 this.setCurrentLayout(layoutMain);
                                 siteBuilderTextArea.clear();
-                                liveViewButton.setSelected(false);
-                                liveViewButton.setIcon(Icons.PLAY);
                                 saveAsSiteButton.setEnabled(true);
                                 saveSiteButton.setEnabled(true);
                                 exportToPastebinButton.setEnabled(true);
@@ -225,8 +221,6 @@ public class GWBApp extends Application {
                             dialog.close();
                             this.setCurrentLayout(layoutMain);
                             siteBuilderTextArea.clear();
-                            liveViewButton.setSelected(false);
-                            liveViewButton.setIcon(Icons.PLAY);
                             saveAsSiteButton.setEnabled(true);
                             saveSiteButton.setEnabled(true);
                             exportToPastebinButton.setEnabled(true);
@@ -237,8 +231,6 @@ public class GWBApp extends Application {
                 }else{
                         this.setCurrentLayout(layoutMain);
                         siteBuilderTextArea.clear();
-                        liveViewButton.setSelected(false);
-                        liveViewButton.setIcon(Icons.PLAY);
                         saveAsSiteButton.setEnabled(true);
                         saveSiteButton.setEnabled(true);
                         exportToPastebinButton.setEnabled(true);
@@ -254,8 +246,6 @@ public class GWBApp extends Application {
                     });
                     this.setCurrentLayout(layoutMain);
                     siteBuilderTextArea.clear();
-                    liveViewButton.setSelected(false);
-                    liveViewButton.setIcon(Icons.PLAY);
                     saveAsSiteButton.setEnabled(true);
                     saveSiteButton.setEnabled(true);
                     exportToPastebinButton.setEnabled(true);
@@ -263,8 +253,6 @@ public class GWBApp extends Application {
                 }*/
                 this.setCurrentLayout(layoutMain);
                 siteBuilderTextArea.clear();
-                //liveViewButton.setSelected(false);
-                //liveViewButton.setIcon(Icons.PLAY);
                 saveAsSiteButton.setEnabled(true);
                 saveSiteButton.setEnabled(true);
                 exportToPastebinButton.setEnabled(true);
@@ -350,37 +338,6 @@ public class GWBApp extends Application {
         });
         layoutCodeView.addComponent(copyToClipboardButton);
 
-        /*liveViewButton = new ButtonToggle(190, 2, Icons.PLAY);
-        liveViewButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-
-            if (mouseButton == 0) {
-
-                boolean active = !liveViewButton.isSelected();
-                liveViewButton.setIcon(active ? Icons.STOP : Icons.PLAY);
-                if (active) {
-                    rawTextSaved = siteBuilderTextArea.getText();
-                    siteBuilderTextArea.setEditable(false);
-                    siteBuilderTextArea.setWrapText(true);
-                    siteBuilderTextArea.setText(renderLiveView(siteBuilderTextArea.getText()));
-                    saveAsSiteButton.setEnabled(false);
-                    saveSiteButton.setEnabled(false);
-                    exportToPastebinButton.setEnabled(false);
-                    copyToClipboardButton.setEnabled(false);
-                } else {
-                    siteBuilderTextArea.setEditable(true);
-                    siteBuilderTextArea.setWrapText(false);
-                    siteBuilderTextArea.setText(rawTextSaved.replace("\n\n", "\n"));
-                    saveAsSiteButton.setEnabled(true);
-                    saveSiteButton.setEnabled(true);
-                    exportToPastebinButton.setEnabled(true);
-                    copyToClipboardButton.setEnabled(true);
-                }
-
-            }
-
-        });
-        layoutCodeView.addComponent(liveViewButton);*/
-
         RadioGroup viewGroup = new RadioGroup();
 
         codeViewCheckBox = new CheckBox("Code", 240, 5);
@@ -417,7 +374,7 @@ public class GWBApp extends Application {
         layoutCodeView.addComponent(liveViewCheckBox);
 
         siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 93, layoutCodeView.height - 22);
-        siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
+        //siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
         for(int i = 0; i < formattingButtons.length - 1; i++) {
