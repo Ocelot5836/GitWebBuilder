@@ -8,6 +8,7 @@ import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.interfaces.IHighlight;
+import com.mrcrayfish.device.api.app.listener.ClickListener;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
 import com.mrcrayfish.device.core.Laptop;
@@ -75,8 +76,6 @@ public class GWBApp extends Application {
 
     private File currentFile;
 
-    private String rawTextSaved = "";
-
     private StandardLayout layoutMain;
     private StandardLayout layoutCodeView;
     private StandardLayout layoutDesignView;
@@ -94,29 +93,9 @@ public class GWBApp extends Application {
     private ButtonToggle liveViewButton;
 
     //16 Color Buttons
-    private Button colorBlackButton;
-    private Button colorDarkBlueButton;
-    private Button colorDarkGreenButton;
-    private Button colorDarkAquaButton;
-    private Button colorDarkRedButton;
-    private Button colorDarkPurpleButton;
-    private Button colorGoldButton;
-    private Button colorGrayButton;
-    private Button colorDarkGrayButton;
-    private Button colorBlueButton;
-    private Button colorGreenButton;
-    private Button colorAquaButton;
-    private Button colorRedButton;
-    private Button colorLightPurpleButton;
-    private Button colorYellowButton;
-    private Button colorWhiteButton;
+    private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
 
     //Formatting Buttons
-    private Button obfuscateButton;
-    private Button boldButton;
-    private Button strikethroughButton;
-    private Button underlineButton;
-    private Button italicButton;
     private Button resetButton;
 
     private ComboBox.List<String> textFormattingSelectionList;
@@ -430,11 +409,9 @@ public class GWBApp extends Application {
         liveViewCheckBox = new CheckBox("Live", 327, 5);
         liveViewCheckBox.setRadioGroup(viewGroup);
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
-
+            if(mouseButton == 0) {
                 liveGitWebFrame.loadRaw(renderLiveView(siteBuilderTextArea.getText()));
                 this.setCurrentLayout(layoutLiveView);
-
             }
         });
         layoutCodeView.addComponent(liveViewCheckBox);
@@ -443,298 +420,39 @@ public class GWBApp extends Application {
         siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
-        Object[] formattingType = new String[]{"Coloring", "Formatting", "Modules"};
-        textFormattingSelectionList = new ComboBox.List(272, 23, 88, formattingType);
-        textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
-                    if (newValue != oldValue) {
-                        if (newValue.equals("Coloring")) {
-
-                            //Set Formatting Buttons Visible to false
-                            obfuscateButton.setVisible(false);
-                            boldButton.setVisible(false);
-                            strikethroughButton.setVisible(false);
-                            underlineButton.setVisible(false);
-                            italicButton.setVisible(false);
-                            resetButton.setVisible(false);
-
-
-                            //Set Color Buttons Visible to true
-                            colorBlackButton.setVisible(true);
-                            colorDarkBlueButton.setVisible(true);
-                            colorDarkGreenButton.setVisible(true);
-                            colorDarkAquaButton.setVisible(true);
-                            colorDarkRedButton.setVisible(true);
-                            colorDarkPurpleButton.setVisible(true);
-                            colorGoldButton.setVisible(true);
-                            colorGrayButton.setVisible(true);
-                            colorDarkGrayButton.setVisible(true);
-                            colorBlueButton.setVisible(true);
-                            colorGreenButton.setVisible(true);
-                            colorAquaButton.setVisible(true);
-                            colorRedButton.setVisible(true);
-                            colorLightPurpleButton.setVisible(true);
-                            colorYellowButton.setVisible(true);
-                            colorWhiteButton.setVisible(true);
-
-                        }
-                        if (newValue.equals("Formatting")) {
-                            //Set Formatting Buttons Visible to true
-                            obfuscateButton.setVisible(true);
-                            boldButton.setVisible(true);
-                            strikethroughButton.setVisible(true);
-                            underlineButton.setVisible(true);
-                            italicButton.setVisible(true);
-                            resetButton.setVisible(true);
-
-                            //Set Color Buttons Visible to false
-                            colorBlackButton.setVisible(false);
-                            colorDarkBlueButton.setVisible(false);
-                            colorDarkGreenButton.setVisible(false);
-                            colorDarkAquaButton.setVisible(false);
-                            colorDarkRedButton.setVisible(false);
-                            colorDarkPurpleButton.setVisible(false);
-                            colorGoldButton.setVisible(false);
-                            colorGrayButton.setVisible(false);
-                            colorDarkGrayButton.setVisible(false);
-                            colorBlueButton.setVisible(false);
-                            colorGreenButton.setVisible(false);
-                            colorAquaButton.setVisible(false);
-                            colorRedButton.setVisible(false);
-                            colorLightPurpleButton.setVisible(false);
-                            colorYellowButton.setVisible(false);
-                            colorWhiteButton.setVisible(false);
-                        }
-                        if (newValue.equals("Modules")) {
-
-                            //Set Formatting Buttons Visible to false
-                            obfuscateButton.setVisible(false);
-                            boldButton.setVisible(false);
-                            strikethroughButton.setVisible(false);
-                            underlineButton.setVisible(false);
-                            italicButton.setVisible(false);
-                            resetButton.setVisible(false);
-
-                            //Set Color Buttons Visible to false
-                            colorBlackButton.setVisible(false);
-                            colorDarkBlueButton.setVisible(false);
-                            colorDarkGreenButton.setVisible(false);
-                            colorDarkAquaButton.setVisible(false);
-                            colorDarkRedButton.setVisible(false);
-                            colorDarkPurpleButton.setVisible(false);
-                            colorGoldButton.setVisible(false);
-                            colorGrayButton.setVisible(false);
-                            colorDarkGrayButton.setVisible(false);
-                            colorBlueButton.setVisible(false);
-                            colorGreenButton.setVisible(false);
-                            colorAquaButton.setVisible(false);
-                            colorRedButton.setVisible(false);
-                            colorLightPurpleButton.setVisible(false);
-                            colorYellowButton.setVisible(false);
-                            colorWhiteButton.setVisible(false);
-
-                        }
-                    }
+        for(int i = 0; i < formattingButtons.length - 1; i++) {
+            int x = 272 + (i % 5) * 18;
+            int y = 39 + (i / 5) * 18;
+            final int index = i;
+            Button button = new Button(x, y, 16, 16, TextFormatting.values()[i] + "A");
+            button.setClickListener((mouseX, mouseY, mouseButton) -> {
+                if(mouseButton == 0) {
+                    siteBuilderTextArea.writeText("&" + TextFormatting.values()[index].toString().substring(1));
+                    siteBuilderTextArea.setFocused(true);
                 }
-        );
+            });
+            layoutCodeView.addComponent(button);
+            formattingButtons[i] = button;
+        }
+
+        String[] formattingType = new String[] { "Formatting", "Modules" };
+        textFormattingSelectionList = new ComboBox.List<>(272, 23, 88, formattingType);
+        textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
+            if(!newValue.equals(oldValue)) {
+                if(newValue.equals("Formatting")) {
+                    for(Button formattingButton : formattingButtons) {
+                        formattingButton.setVisible(true);
+                    }
+                    resetButton.setVisible(true);
+                } else if(newValue.equals("Modules")) {
+                    for(Button formattingButton : formattingButtons) {
+                        formattingButton.setVisible(false);
+                    }
+                    resetButton.setVisible(false);
+                }
+            }
+        });
         layoutCodeView.addComponent(textFormattingSelectionList);
-
-
-        //Color Buttons
-        colorBlackButton = new Button(272, 39, 16, 16, TextFormatting.BLACK + "A");
-        colorBlackButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&0");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorBlackButton);
-
-        colorDarkBlueButton = new Button(290, 39, 16, 16, TextFormatting.DARK_BLUE + "A");
-        colorDarkBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&1");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkBlueButton);
-
-        colorDarkGreenButton = new Button(308, 39, 16, 16, TextFormatting.DARK_GREEN + "A");
-        colorDarkGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&2");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkGreenButton);
-
-        colorDarkAquaButton = new Button(326, 39, 16, 16, TextFormatting.DARK_AQUA + "A");
-        colorDarkAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&3");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkAquaButton);
-
-        colorDarkRedButton = new Button(344, 39, 16, 16, TextFormatting.DARK_RED + "A");
-        colorDarkRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&4");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkRedButton);
-
-        colorDarkPurpleButton = new Button(272, 57, 16, 16, TextFormatting.DARK_PURPLE + "A");
-        colorDarkPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&5");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkPurpleButton);
-
-        colorGoldButton = new Button(290, 57, 16, 16, TextFormatting.GOLD + "A");
-        colorGoldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&6");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorGoldButton);
-
-        colorGrayButton = new Button(308, 57, 16, 16, TextFormatting.GRAY + "A");
-        colorGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&7");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorGrayButton);
-
-        colorDarkGrayButton = new Button(326, 57, 16, 16, TextFormatting.DARK_GRAY + "A");
-        colorDarkGrayButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&8");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorDarkGrayButton);
-
-        colorBlueButton = new Button(344, 57, 16, 16, TextFormatting.BLUE + "A");
-        colorBlueButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&9");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorBlueButton);
-
-        colorGreenButton = new Button(272, 75, 16, 16, TextFormatting.GREEN + "A");
-        colorGreenButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&a");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorGreenButton);
-
-        colorAquaButton = new Button(290, 75, 16, 16, TextFormatting.AQUA + "A");
-        colorAquaButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&b");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorAquaButton);
-
-        colorRedButton = new Button(308, 75, 16, 16, TextFormatting.RED + "A");
-        colorRedButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&c");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorRedButton);
-
-        colorLightPurpleButton = new Button(326, 75, 16, 16, TextFormatting.LIGHT_PURPLE + "A");
-        colorLightPurpleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&d");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorLightPurpleButton);
-
-        colorYellowButton = new Button(344, 75, 16, 16, TextFormatting.YELLOW + "A");
-        colorYellowButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&e");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorYellowButton);
-
-        colorWhiteButton = new Button(308, 93, 16, 16, TextFormatting.WHITE + "A");
-        colorWhiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&f");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(colorWhiteButton);
-
-
-        //Formatting Button
-        obfuscateButton = new Button(272, 39, 16, 16, TextFormatting.OBFUSCATED + "A");
-        obfuscateButton.setVisible(false);
-        obfuscateButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&k");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(obfuscateButton);
-
-        boldButton = new Button(290, 39, 16, 16, TextFormatting.BOLD + "A");
-        boldButton.setVisible(false);
-        boldButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&l");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(boldButton);
-
-        strikethroughButton = new Button(308, 39, 16, 16, TextFormatting.STRIKETHROUGH + "A");
-        strikethroughButton.setVisible(false);
-        strikethroughButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&m");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(strikethroughButton);
-
-        underlineButton = new Button(326, 39, 16, 16, TextFormatting.UNDERLINE + "A");
-        underlineButton.setVisible(false);
-        underlineButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&n");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(underlineButton);
-
-        italicButton = new Button(344, 39, 16, 16, TextFormatting.ITALIC + "A");
-        italicButton.setVisible(false);
-        italicButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if (mouseButton == 0) {
-                siteBuilderTextArea.writeText("&o");
-                siteBuilderTextArea.setFocused(true);
-            }
-        });
-        layoutCodeView.addComponent(italicButton);
 
         resetButton = new Button(298, 57, 35, 16, "Reset");
         resetButton.setVisible(false);
