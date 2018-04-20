@@ -327,7 +327,35 @@ public class GWBApp extends Application {
         });
         layoutCodeView.addComponent(exportToPastebinButton);
 
-        copyToClipboardButton = new Button(172, 2, Icons.COPY);
+        importButton = new Button(172, 2, Icons.IMPORT);
+        importButton.setToolTip("Import", "Import an existing site into GitWeb Builder");
+        importButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if(mouseButton == 0){
+
+                Dialog.Input importDialog = new Dialog.Input("Insert URL to the raw text of the site");
+                importDialog.setTitle("Import Site");
+                importDialog.setPositiveText("Import");
+                this.openDialog(importDialog);
+                importDialog.setResponseHandler((success, s) -> {
+                   if(success)
+                    {
+
+                            OnlineRequest.getInstance().make(importDialog.getTextFieldInput().getText().toString(), (success1, response) -> {
+                                if (success1) {
+                                    siteBuilderTextArea.setText(unrenderFormatting(response));
+                                }
+                            });
+                            importDialog.close();
+                    }
+                    return false;
+                });
+
+
+            }
+        });
+        layoutCodeView.addComponent(importButton);
+
+        copyToClipboardButton = new Button(190, 2, Icons.COPY);
         copyToClipboardButton.setToolTip("Copy to Clipboard", "Copy's code to clipboard with correct formatting for GitWeb");
         copyToClipboardButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
