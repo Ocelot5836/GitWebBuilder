@@ -3,13 +3,14 @@ package mastef_chief.gitwebbuilder.app;
 import com.mrcrayfish.device.api.app.Application;
 import com.mrcrayfish.device.api.app.Dialog;
 import com.mrcrayfish.device.api.app.Icons;
-import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Button;
+import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.interfaces.IHighlight;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
+import com.mrcrayfish.device.api.utils.OnlineRequest;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
@@ -26,6 +27,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
@@ -73,7 +75,7 @@ public class GWBApp extends Application {
     private GitWebFrame liveGitWebFrame;
 
     private float rotationCounter = 0;
-    private int characterCounter = 0;
+    private int tickCounter = 0;
 
     private File currentFile;
 
@@ -86,9 +88,11 @@ public class GWBApp extends Application {
     private Button loadSiteButton;
     private Button backToMenuButton;
     private Button saveAsSiteButton;
-    private Button exportToPastebinButton;
     private Button saveSiteButton;
+    private Button exportToPastebinButton;
+    private Button importButton;
     private Button copyToClipboardButton;
+
 
     //16 Color Buttons
     private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
@@ -395,19 +399,19 @@ public class GWBApp extends Application {
         liveViewCheckBox.setRadioGroup(viewGroup);
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
             if(mouseButton == 0) {
-                liveGitWebFrame.loadRaw(renderLiveView(siteBuilderTextArea.getText()));
+                liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                 this.setCurrentLayout(layoutLiveView);
             }
         });
         layoutCodeView.addComponent(liveViewCheckBox);
 
-        siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 93, layoutCodeView.height - 22);
+        siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 75, layoutCodeView.height - 22);
         //siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
-        for(int i = 0; i < formattingButtons.length - 1; i++) {
-            int x = 272 + (i % 5) * 18;
-            int y = 39 + (i / 5) * 18;
+        for(int i = 0; i < formattingButtons.length; i++) {
+            int x = 290 + (i % 4) * 18;
+            int y = 39 + (i / 4) * 18;
             final int index = i;
             Button button = new Button(x, y, 16, 16, TextFormatting.values()[i] + "A");
             button.setClickListener((mouseX, mouseY, mouseButton) -> {
@@ -421,7 +425,7 @@ public class GWBApp extends Application {
         }
 
         String[] formattingType = new String[] { "Formatting", "Modules" };
-        textFormattingSelectionList = new ComboBox.List<>(272, 23, 88, formattingType);
+        textFormattingSelectionList = new ComboBox.List<>(290, 23, 70, formattingType);
         textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
             if(!newValue.equals(oldValue)) {
                 if(newValue.equals("Formatting")) {
@@ -439,8 +443,7 @@ public class GWBApp extends Application {
         });
         layoutCodeView.addComponent(textFormattingSelectionList);
 
-        resetButton = new Button(298, 57, 35, 16, "Reset");
-        resetButton.setVisible(false);
+        resetButton = new Button(308, 129, 52, 16, "Reset");
         resetButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 siteBuilderTextArea.writeText("&r");
@@ -455,6 +458,11 @@ public class GWBApp extends Application {
 
         layoutDesignView = new StandardLayout("Design View", 363, 165, this, null);
         layoutDesignView.setIcon(Icons.EDIT);
+        layoutDesignView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
+        {
+            Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+            gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
+        });
 
         layoutDesignView.addComponent(codeViewCheckBox);
         layoutDesignView.addComponent(designViewCheckBox);
@@ -465,6 +473,11 @@ public class GWBApp extends Application {
 
         layoutLiveView = new StandardLayout("Live View", 363, 165, this, null);
         layoutLiveView.setIcon(Icons.PLAY);
+        layoutLiveView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
+        {
+            Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+            gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
+        });
 
         layoutLiveView.addComponent(codeViewCheckBox);
         layoutLiveView.addComponent(designViewCheckBox);
@@ -512,17 +525,38 @@ public class GWBApp extends Application {
         rotationCounter %= 360;
 
 
+        if(this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView)) {
+
+            if (tickCounter == 100) {
+                if (currentFile != null) {
+
+                    NBTTagCompound data = new NBTTagCompound();
+                    data.setString("content", siteBuilderTextArea.getText());
+                    currentFile.setData(data, (v, success) -> {
+                        if (success) {
+
+                        }
+                    });
+                }
+                tickCounter = 0;
+            }
+            tickCounter++;
+        }
+
+
+
     }
 
     public void createPastebin(String title, String code) {
-        String apikey = "";
+        String apikey = "12bfae53f22fc3d7bd73eb515f5a147f";
+        String option = "paste";
         try {
-            URL url = new URL("http://mastefchief.com/gwbpb/api/create");
+            URL url = new URL("https://pastebin.com/api/api_post.php");
             URLConnection conn = url.openConnection();
             conn.setDoOutput(true);
             OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
 
-            writer.write("text=" + code + "&title=" + title + "&name=" + Minecraft.getMinecraft().player.getName());
+            writer.write("api_dev_key=" + apikey + "&api_option=" + option + "&api_paste_code=" + code + "&api_paste_name=" + title + "&api_paste_private=" + "0");
             writer.flush();
             String line;
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -538,7 +572,7 @@ public class GWBApp extends Application {
     }
 
 
-    public String renderLiveView(String content) {
+    public String renderFormatting(String content) {
 
         return content
                 //new line fix
@@ -553,12 +587,24 @@ public class GWBApp extends Application {
                 .replace("&o", "\u00A7o").replace("&r", "\u00A7r");
 
     }
+    
+    public String unrenderFormatting(String content){
+        return content
+                .replace("§0", "&0").replace("§1", "&1").replace("§2", "&2").replace("§3", "&3")
+                .replace("§4", "&4").replace("§5", "&5").replace("§6", "&6").replace("§7", "&7")
+                .replace("§8", "&8").replace("§9", "&9").replace("§a", "&a").replace("§b", "&b")
+                .replace("§c", "&c").replace("§d", "&d").replace("§e", "&e").replace("§f", "&f")
+                .replace("§k", "&k").replace("§l", "&l").replace("§m", "&m").replace("§n", "&n")
+                .replace("§o", "&o").replace("§r", "&r");
+                
+                
+    }
 
     @Override
     public void handleKeyTyped(char character, int code) {
         super.handleKeyTyped(character, code);
 
-        if (this.getCurrentLayout() == layoutCodeView) {
+        if (this.getCurrentLayout().equals(layoutCodeView)) {
             if (GuiScreen.isCtrlKeyDown() && code == Keyboard.KEY_S) {
 
                 if (currentFile != null) {
@@ -594,22 +640,6 @@ public class GWBApp extends Application {
                 this.openDialog(saveDialog);
             }
         }
-
-
-        if (characterCounter == 5) {
-            if (currentFile != null) {
-
-                NBTTagCompound data = new NBTTagCompound();
-                data.setString("content", siteBuilderTextArea.getText());
-                currentFile.setData(data, (v, success) -> {
-                    if (success) {
-
-                    }
-                });
-            }
-            characterCounter = 0;
-        }
-        characterCounter++;
 
         if (code == Keyboard.KEY_DELETE) {
             siteBuilderTextArea.moveCursorRight(1);
