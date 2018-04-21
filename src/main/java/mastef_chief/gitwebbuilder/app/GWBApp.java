@@ -27,7 +27,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
@@ -50,14 +49,13 @@ public class GWBApp extends Application {
 
     public static final IHighlight CODE_HIGHLIGHT = text ->
     {
-        if(text.startsWith("#"))
+        if (text.startsWith("#"))
             return asArray(TextFormatting.GREEN);
 
-        if(text.startsWith("\"") && text.endsWith("\""))
+        if (text.startsWith("\"") && text.endsWith("\""))
             return asArray(TextFormatting.AQUA);
 
-        switch(text)
-        {
+        switch (text) {
             case "text":
             case "image":
                 return asArray(TextFormatting.BLUE);
@@ -77,22 +75,25 @@ public class GWBApp extends Application {
     private float rotationCounter = 0;
     private int tickCounter = 0;
 
+    private boolean autoSave = true;
+
     private File currentFile;
 
     private StandardLayout layoutMain;
+    private StandardLayout layoutSettings;
     private StandardLayout layoutCodeView;
     private StandardLayout layoutDesignView;
     private StandardLayout layoutLiveView;
 
     private Button newSiteButton;
     private Button loadSiteButton;
-    private Button backToMenuButton;
+    private Button settingsButton;
+    private Button backToMenuButton1;
     private Button saveAsSiteButton;
     private Button saveSiteButton;
     private Button exportToPastebinButton;
     private Button importButton;
     private Button copyToClipboardButton;
-
 
     //16 Color Buttons
     private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
@@ -103,7 +104,10 @@ public class GWBApp extends Application {
     private ComboBox.List<String> textFormattingSelectionList;
 
     private Label descLabel;
+    private Label autoSaveLabel;
 
+    private CheckBox autoSaveOnCheckBox;
+    private CheckBox autoSaveOffCheckBox;
     private CheckBox codeViewCheckBox;
     private CheckBox designViewCheckBox;
     private CheckBox liveViewCheckBox;
@@ -177,94 +181,133 @@ public class GWBApp extends Application {
 
         layoutMain.addComponent(loadSiteButton);
 
+        settingsButton = new Button(250, 105, 75, 16, "Settings", Icons.WRENCH);
+        settingsButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                this.setCurrentLayout(layoutSettings);
+            }
+        });
+        layoutMain.addComponent(settingsButton);
+
         descLabel = new Label("A Site Builder For GitWeb", 43, 150);
         layoutMain.addComponent(descLabel);
 
         this.setCurrentLayout(layoutMain);
+        /*----------------------------------------------------------------------------------------------------------------------------------------*/
+
+        layoutSettings = new StandardLayout("Settings", 363, 165, this, layoutMain){
+            @Override
+            protected void handleUnload() {
+                super.handleUnload();
+            }
+        };
+        layoutSettings.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
+        {
+            Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+            gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
+        });
+
+        int autoSaveX = 10;
+        int autoSaveY = 30;
+        autoSaveLabel = new Label("\u00A7n\u00A7lAuto Save", autoSaveX, autoSaveY);
+        layoutSettings.addComponent(autoSaveLabel);
+        RadioGroup autoSaveToggle = new RadioGroup();
+
+        autoSaveOnCheckBox = new CheckBox("On", autoSaveX, autoSaveY + 15);
+        autoSaveOnCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                autoSave = true;
+                markDirty();
+            }
+        });
+        autoSaveOnCheckBox.setRadioGroup(autoSaveToggle);
+        layoutSettings.addComponent(autoSaveOnCheckBox);
+
+        autoSaveOffCheckBox = new CheckBox("Off", autoSaveX + 30, autoSaveY + 15);
+        autoSaveOffCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                autoSave = false;
+                markDirty();
+            }
+        });
+        autoSaveOffCheckBox.setRadioGroup(autoSaveToggle);
+        layoutSettings.addComponent(autoSaveOffCheckBox);
+
 
         /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
         layoutCodeView = new StandardLayout("Code View", 363, 165, this, null);
         layoutCodeView.setIcon(Icons.EARTH);
 
-        backToMenuButton = new Button(100, 2, Icons.ARROW_LEFT);
-        backToMenuButton.setToolTip("Back To Menu", "Will take you back to the main menu");
-        backToMenuButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+        backToMenuButton1 = new Button(100, 2, Icons.ARROW_LEFT);
+        backToMenuButton1.setToolTip("Back To Menu", "Will take you back to the main menu");
+        backToMenuButton1.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
 
                 //Todo add function to check if file is saved when back button is pressed and if not saved see if user would like to save
-                /*if(currentFile == null) {
 
-                    if(!siteBuilderTextArea.getText().isEmpty()){
-                    Dialog.Confirmation dialog = new Dialog.Confirmation("sadsa");
-                    dialog.setPositiveText("Yes");
-                    dialog.setNegativeText("No");
-                    this.openDialog(dialog);
-                    dialog.setPositiveListener((mouseX1, mouseY1, mouseButton1) -> {
-                        if (mouseButton1 == 0) {
-                            NBTTagCompound data = new NBTTagCompound();
-                            data.setString("content", siteBuilderTextArea.getText());
+                if (currentFile == null) {
 
-                            Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-
-                            saveDialog.setResponseHandler((success, file) -> {
-                                currentFile = file;
-                                this.setCurrentLayout(layoutMain);
-                                siteBuilderTextArea.clear();
-                                saveAsSiteButton.setEnabled(true);
-                                saveSiteButton.setEnabled(true);
-                                exportToPastebinButton.setEnabled(true);
-                                copyToClipboardButton.setEnabled(true);
-                                return true;
-                            });
-                            this.openDialog(saveDialog);
-                        }
-                    });
-                    dialog.setNegativeListener((mouseX1, mouseY1, mouseButton1) -> {
-                        if (mouseButton1 == 0) {
-                            dialog.close();
-                            this.setCurrentLayout(layoutMain);
-                            siteBuilderTextArea.clear();
-                            saveAsSiteButton.setEnabled(true);
-                            saveSiteButton.setEnabled(true);
-                            exportToPastebinButton.setEnabled(true);
-                            copyToClipboardButton.setEnabled(true);
-                        }
-                    });
-
-                }else{
+                    if (siteBuilderTextArea.getText().isEmpty()) {
                         this.setCurrentLayout(layoutMain);
-                        siteBuilderTextArea.clear();
-                        saveAsSiteButton.setEnabled(true);
-                        saveSiteButton.setEnabled(true);
-                        exportToPastebinButton.setEnabled(true);
-                        copyToClipboardButton.setEnabled(true);
-                    }
-                }else{
-                    NBTTagCompound data = new NBTTagCompound();
-                    data.setString("content", siteBuilderTextArea.getText());
-                    currentFile.setData(data, (v, success) -> {
-                        if (success) {
+                    } else {
+                        Dialog.Confirmation saveCheckDialog = new Dialog.Confirmation("You have not saved your site, would you like to save?");
+                        saveCheckDialog.setPositiveText("Yes");
+                        saveCheckDialog.setNegativeText("No");
+                        this.openDialog(saveCheckDialog);
+                        saveCheckDialog.setPositiveListener((mouseX1, mouseY1, mouseButton1) -> {
+                            if (mouseButton1 == 0) {
+                                NBTTagCompound data = new NBTTagCompound();
+                                data.setString("content", siteBuilderTextArea.getText());
+                                Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                                this.openDialog(saveDialog);
+                                saveDialog.setResponseHandler((success, file) -> {
+                                    siteBuilderTextArea.clear();
+                                    this.setCurrentLayout(layoutMain);
+                                    return true;
+                                });
+                            }
+                        });
+                        saveCheckDialog.setNegativeListener((mouseX1, mouseY1, mouseButton1) -> {
+                            System.out.println("Tada");
+                            if (mouseButton1 == 0) {
 
-                        }
-                    });
-                    this.setCurrentLayout(layoutMain);
-                    siteBuilderTextArea.clear();
-                    saveAsSiteButton.setEnabled(true);
-                    saveSiteButton.setEnabled(true);
-                    exportToPastebinButton.setEnabled(true);
-                    copyToClipboardButton.setEnabled(true);
-                }*/
-                this.setCurrentLayout(layoutMain);
-                siteBuilderTextArea.clear();
-                saveAsSiteButton.setEnabled(true);
-                saveSiteButton.setEnabled(true);
-                exportToPastebinButton.setEnabled(true);
-                copyToClipboardButton.setEnabled(true);
-                currentFile = null;
+                                this.setCurrentLayout(layoutMain);
+                            }
+                        });
+                    }
+                } else {
+                    if (currentFile.getData().getString("content").equals(siteBuilderTextArea.getText())) {
+                        siteBuilderTextArea.clear();
+                        this.setCurrentLayout(layoutMain);
+                        currentFile = null;
+                    } else {
+                        Dialog.Confirmation saveCheckDialog = new Dialog.Confirmation("You have unsaved changes, would you like to save?");
+                        this.openDialog(saveCheckDialog);
+                        saveCheckDialog.setPositiveListener((mouseX1, mouseY1, mouseButton1) -> {
+                            if (mouseButton1 == 0) {
+                                NBTTagCompound data = new NBTTagCompound();
+                                data.setString("content", siteBuilderTextArea.getText());
+                                currentFile.setData(data, (v, success) -> {
+                                });
+                                siteBuilderTextArea.clear();
+                                this.setCurrentLayout(layoutMain);
+                                currentFile = null;
+                            }
+                        });
+                        saveCheckDialog.setNegativeListener((mouseX2, mouseY2, mouseButton2) -> {
+                            if (mouseButton2 == 0) {
+                                saveCheckDialog.close();
+                                siteBuilderTextArea.clear();
+                                this.setCurrentLayout(layoutMain);
+                                currentFile = null;
+                            }
+                        });
+                    }
+                }
             }
         });
-        layoutCodeView.addComponent(backToMenuButton);
+        layoutCodeView.addComponent(backToMenuButton1);
 
         saveAsSiteButton = new Button(118, 2, Icons.SAVE);
         saveAsSiteButton.setToolTip("Save As", "Saves your site to a new file");
@@ -334,22 +377,21 @@ public class GWBApp extends Application {
         importButton = new Button(172, 2, Icons.IMPORT);
         importButton.setToolTip("Import", "Import an existing site into GitWeb Builder");
         importButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
+            if (mouseButton == 0) {
 
                 Dialog.Input importDialog = new Dialog.Input("Insert URL to the raw text of the site");
                 importDialog.setTitle("Import Site");
                 importDialog.setPositiveText("Import");
                 this.openDialog(importDialog);
                 importDialog.setResponseHandler((success, s) -> {
-                   if(success)
-                    {
+                    if (success) {
 
-                            OnlineRequest.getInstance().make(importDialog.getTextFieldInput().getText().toString(), (success1, response) -> {
-                                if (success1) {
-                                    siteBuilderTextArea.setText(unrenderFormatting(response));
-                                }
-                            });
-                            importDialog.close();
+                        OnlineRequest.getInstance().make(importDialog.getTextFieldInput().getText().toString(), (success1, response) -> {
+                            if (success1) {
+                                siteBuilderTextArea.setText(unrenderFormatting(response));
+                            }
+                        });
+                        importDialog.close();
                     }
                     return false;
                 });
@@ -376,7 +418,7 @@ public class GWBApp extends Application {
         codeViewCheckBox.setSelected(true);
         codeViewCheckBox.setRadioGroup(viewGroup);
         codeViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
+            if (mouseButton == 0) {
 
                 this.setCurrentLayout(layoutCodeView);
 
@@ -387,7 +429,7 @@ public class GWBApp extends Application {
         designViewCheckBox = new CheckBox("Design", 280, 5);
         designViewCheckBox.setRadioGroup(viewGroup);
         designViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
+            if (mouseButton == 0) {
 
                 this.setCurrentLayout(layoutDesignView);
 
@@ -398,7 +440,7 @@ public class GWBApp extends Application {
         liveViewCheckBox = new CheckBox("Live", 327, 5);
         liveViewCheckBox.setRadioGroup(viewGroup);
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0) {
+            if (mouseButton == 0) {
                 liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                 this.setCurrentLayout(layoutLiveView);
             }
@@ -409,13 +451,13 @@ public class GWBApp extends Application {
         //siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
-        for(int i = 0; i < formattingButtons.length; i++) {
+        for (int i = 0; i < formattingButtons.length; i++) {
             int x = 290 + (i % 4) * 18;
             int y = 39 + (i / 4) * 18;
             final int index = i;
             Button button = new Button(x, y, 16, 16, TextFormatting.values()[i] + "A");
             button.setClickListener((mouseX, mouseY, mouseButton) -> {
-                if(mouseButton == 0) {
+                if (mouseButton == 0) {
                     siteBuilderTextArea.writeText("&" + TextFormatting.values()[index].toString().substring(1));
                     siteBuilderTextArea.setFocused(true);
                 }
@@ -424,17 +466,17 @@ public class GWBApp extends Application {
             formattingButtons[i] = button;
         }
 
-        String[] formattingType = new String[] { "Formatting", "Modules" };
+        String[] formattingType = new String[]{"Formatting", "Modules"};
         textFormattingSelectionList = new ComboBox.List<>(290, 23, 70, formattingType);
         textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
-            if(!newValue.equals(oldValue)) {
-                if(newValue.equals("Formatting")) {
-                    for(Button formattingButton : formattingButtons) {
+            if (!newValue.equals(oldValue)) {
+                if (newValue.equals("Formatting")) {
+                    for (Button formattingButton : formattingButtons) {
                         formattingButton.setVisible(true);
                     }
                     resetButton.setVisible(true);
-                } else if(newValue.equals("Modules")) {
-                    for(Button formattingButton : formattingButtons) {
+                } else if (newValue.equals("Modules")) {
+                    for (Button formattingButton : formattingButtons) {
                         formattingButton.setVisible(false);
                     }
                     resetButton.setVisible(false);
@@ -483,7 +525,7 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(designViewCheckBox);
         layoutLiveView.addComponent(liveViewCheckBox);
 
-        liveGitWebFrame = new GitWebFrame(this, 0, 21,  layoutCodeView.width, layoutCodeView.height - 22);
+        liveGitWebFrame = new GitWebFrame(this, 0, 21, layoutCodeView.width, layoutCodeView.height - 22);
         layoutLiveView.addComponent(liveGitWebFrame);
 
     }
@@ -525,26 +567,19 @@ public class GWBApp extends Application {
         rotationCounter %= 360;
 
 
-        if(this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView)) {
-
-            if (tickCounter == 100) {
+        if (autoSave) {
+            if (this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView)) {
                 if (currentFile != null) {
-
-                    NBTTagCompound data = new NBTTagCompound();
-                    data.setString("content", siteBuilderTextArea.getText());
-                    currentFile.setData(data, (v, success) -> {
-                        if (success) {
-
-                        }
-                    });
+                    if (tickCounter == 100) {
+                        NBTTagCompound data = new NBTTagCompound();
+                        data.setString("content", siteBuilderTextArea.getText());
+                        currentFile.setData(data, (v, success) -> {});
+                        tickCounter = 0;
+                    }
+                    tickCounter++;
                 }
-                tickCounter = 0;
             }
-            tickCounter++;
         }
-
-
-
     }
 
     public void createPastebin(String title, String code) {
@@ -587,8 +622,8 @@ public class GWBApp extends Application {
                 .replace("&o", "\u00A7o").replace("&r", "\u00A7r");
 
     }
-    
-    public String unrenderFormatting(String content){
+
+    public String unrenderFormatting(String content) {
         return content
                 .replace("§0", "&0").replace("§1", "&1").replace("§2", "&2").replace("§3", "&3")
                 .replace("§4", "&4").replace("§5", "&5").replace("§6", "&6").replace("§7", "&7")
@@ -596,8 +631,8 @@ public class GWBApp extends Application {
                 .replace("§c", "&c").replace("§d", "&d").replace("§e", "&e").replace("§f", "&f")
                 .replace("§k", "&k").replace("§l", "&l").replace("§m", "&m").replace("§n", "&n")
                 .replace("§o", "&o").replace("§r", "&r");
-                
-                
+
+
     }
 
     @Override
@@ -669,8 +704,7 @@ public class GWBApp extends Application {
         currentFile = null;
     }
 
-    private static <T extends Object> T[] asArray(T ... t)
-    {
+    private static <T extends Object> T[] asArray(T... t) {
         return t;
     }
 
@@ -685,6 +719,16 @@ public class GWBApp extends Application {
     @Override
     public void load(NBTTagCompound tagCompound) {
 
+        if (tagCompound.hasKey("autoSave", Constants.NBT.TAG_BYTE)) {
+            autoSave = tagCompound.getBoolean("autoSave");
+        }
+
+        if (autoSave) {
+            autoSaveOnCheckBox.setSelected(true);
+        } else {
+            autoSaveOffCheckBox.setSelected(true);
+        }
+
     }
 
     /**
@@ -696,6 +740,8 @@ public class GWBApp extends Application {
      */
     @Override
     public void save(NBTTagCompound tagCompound) {
+
+        tagCompound.setBoolean("autoSave", autoSave);
 
     }
 }
