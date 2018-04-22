@@ -679,7 +679,52 @@ public class GWBApp extends Application {
         if (code == Keyboard.KEY_DELETE) {
             siteBuilderTextArea.moveCursorRight(1);
             siteBuilderTextArea.performBackspace();
+        }*/
+
+        if (this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView) || this.getCurrentLayout().equals(layoutLiveView)) {
+            if (GuiScreen.isCtrlKeyDown()) {
+                if (code == Keyboard.KEY_LEFT) {
+                    if (this.getCurrentLayout().equals(layoutCodeView)) {
+                        this.setCurrentLayout(layoutLiveView);
+                        codeViewCheckBox.setSelected(false);
+                        designViewCheckBox.setSelected(false);
+                        liveViewCheckBox.setSelected(true);
+                    } else if (this.getCurrentLayout().equals(layoutDesignView)) {
+                        this.setCurrentLayout(layoutCodeView);
+                        codeViewCheckBox.setSelected(true);
+                        designViewCheckBox.setSelected(false);
+                        liveViewCheckBox.setSelected(false);
+                    } else if (this.getCurrentLayout().equals(layoutLiveView)) {
+                        this.setCurrentLayout(layoutDesignView);
+                        codeViewCheckBox.setSelected(false);
+                        designViewCheckBox.setSelected(true);
+                        liveViewCheckBox.setSelected(false);
+                    }
+                }
+
+                if (code == Keyboard.KEY_RIGHT) {
+                    if (this.getCurrentLayout().equals(layoutCodeView)) {
+                        this.setCurrentLayout(layoutDesignView);
+                        codeViewCheckBox.setSelected(false);
+                        designViewCheckBox.setSelected(true);
+                        liveViewCheckBox.setSelected(false);
+                    } else if (this.getCurrentLayout().equals(layoutDesignView)) {
+                        this.setCurrentLayout(layoutLiveView);
+                        codeViewCheckBox.setSelected(false);
+                        designViewCheckBox.setSelected(false);
+                        liveViewCheckBox.setSelected(true);
+                    } else if (this.getCurrentLayout().equals(layoutLiveView)) {
+                        this.setCurrentLayout(layoutCodeView);
+                        codeViewCheckBox.setSelected(true);
+                        designViewCheckBox.setSelected(false);
+                        liveViewCheckBox.setSelected(false);
+                    }
+                }
+
+            }
         }
+
+
     }
 
     @Override
