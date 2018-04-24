@@ -613,8 +613,8 @@ public class GWBApp extends Application {
                     if (tickCounter == 100) {
                         NBTTagCompound data = new NBTTagCompound();
                         data.setString("content", siteBuilderTextArea.getText());
-                        currentFile.setData(data, (v, success) -> {
-                        });
+                        if(currentFile.)
+                        currentFile.setData(data, (v, success) -> {});
                         tickCounter = 0;
                     }
                     tickCounter++;
@@ -684,6 +684,7 @@ public class GWBApp extends Application {
                     data.setString("content", siteBuilderTextArea.getText());
 
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                    saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
                         currentFile = file;
                         return true;
@@ -697,6 +698,7 @@ public class GWBApp extends Application {
                 data.setString("content", siteBuilderTextArea.getText());
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
+                saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
                     currentFile = file;
                     return true;
@@ -824,26 +826,34 @@ public class GWBApp extends Application {
     private static class Sites
     {
         private File source;
+        private String fileName;
         private String content;
 
-        public Sites(String content)
+        public Sites(String fileName, String content)
         {
+            this.fileName = fileName;
             this.content = content;
         }
 
-        public File getSource()
-        {
-            return source;
+        public File getSource() {
+            return this.source;
         }
 
-        public String getContent()
-        {
-            return content;
+        public String getFileName() {
+            return this.fileName;
+        }
+
+        public String getContent() {
+            return this.content;
+        }
+
+        public String toString() {
+            return this.fileName;
         }
 
         public static Sites fromFile(File file)
         {
-            Sites note = new Sites(file.getData().getString("content"));
+            Sites note = new Sites(file.getName(), file.getData().getString("content"));
             note.source = file;
             return note;
         }
