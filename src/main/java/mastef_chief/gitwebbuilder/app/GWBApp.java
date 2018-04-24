@@ -613,7 +613,6 @@ public class GWBApp extends Application {
                     if (tickCounter == 100) {
                         NBTTagCompound data = new NBTTagCompound();
                         data.setString("content", siteBuilderTextArea.getText());
-                        if(currentFile.)
                         currentFile.setData(data, (v, success) -> {});
                         tickCounter = 0;
                     }
