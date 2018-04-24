@@ -14,7 +14,10 @@ import com.mrcrayfish.device.api.utils.OnlineRequest;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
+import com.mrcrayfish.device.programs.gitweb.module.FooterModule;
+import com.mrcrayfish.device.programs.gitweb.module.Module;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
+import mastef_chief.gitwebbuilder.app.components.MenuButton;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
@@ -27,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
@@ -75,6 +79,10 @@ public class GWBApp extends Application {
     private float rotationCounter = 0;
     private int tickCounter = 0;
 
+    //Todo work on save method to enable and disable save button
+    private String savedData;
+
+    private boolean isSaved;
     private boolean autoSave = true;
 
     private File currentFile;
@@ -85,9 +93,10 @@ public class GWBApp extends Application {
     private StandardLayout layoutDesignView;
     private StandardLayout layoutLiveView;
 
-    private Button newSiteButton;
-    private Button loadSiteButton;
-    private Button settingsButton;
+    private MenuButton newSiteButton;
+    private MenuButton loadSiteButton;
+    private MenuButton settingsButton;
+    private MenuButton loadSiteFromListButton;
     private Button backToMenuButton1;
     private Button saveAsSiteButton;
     private Button saveSiteButton;
@@ -103,7 +112,9 @@ public class GWBApp extends Application {
 
     private ComboBox.List<String> textFormattingSelectionList;
 
-    private Label descLabel;
+    private ItemList<GWBApp.Sites> sitesList;
+
+    private Label recentSitesLabel;
     private Label autoSaveLabel;
 
     private CheckBox autoSaveOnCheckBox;
@@ -129,18 +140,25 @@ public class GWBApp extends Application {
      */
     @Override
     public void init() {
+
         /*--------------------------------------------------------------------------*/
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
+        layoutMain.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
+        {
+            Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+            gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
+        });
 
         layoutMain.setInitListener(() ->
         {
+            sitesList.getItems().clear();
             FileSystem.getApplicationFolder(this, (folder, success) ->
             {
                 if (success) {
                     folder.search(file -> file.isForApplication(this)).forEach(file ->
                     {
-
+                        sitesList.addItem(Sites.fromFile(file));
                     });
                 } else {
                     this.openDialog(new Dialog.Message("Error creating app directory"));
@@ -148,7 +166,7 @@ public class GWBApp extends Application {
             });
         });
 
-        newSiteButton = new Button(250, 65, 75, 16, "New Site", Icons.NEW_FILE);
+        newSiteButton = new MenuButton(160, 45, 75, 16, "New Site", Icons.NEW_FILE);
         newSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 this.setCurrentLayout(layoutCodeView);
@@ -157,7 +175,7 @@ public class GWBApp extends Application {
         });
 
         layoutMain.addComponent(newSiteButton);
-        loadSiteButton = new Button(250, 85, 75, 16, "Load Site", Icons.LOAD);
+        loadSiteButton = new MenuButton(185, 85, 75, 16, "Load Site", Icons.LOAD);
         loadSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
@@ -167,6 +185,9 @@ public class GWBApp extends Application {
                         NBTTagCompound data = file.getData();
                         siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
                         currentFile = file;
+                        //Todo Testing Code
+                        /*saveSiteButton.setEnabled(false);
+                        savedData = siteBuilderTextArea.getText();*/
                         this.setCurrentLayout(layoutCodeView);
                         return true;
                     } else {
@@ -181,7 +202,7 @@ public class GWBApp extends Application {
 
         layoutMain.addComponent(loadSiteButton);
 
-        settingsButton = new Button(250, 105, 75, 16, "Settings", Icons.WRENCH);
+        settingsButton = new MenuButton(210, 125, 75, 16, "Settings", Icons.WRENCH);
         settingsButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 this.setCurrentLayout(layoutSettings);
@@ -189,13 +210,36 @@ public class GWBApp extends Application {
         });
         layoutMain.addComponent(settingsButton);
 
-        descLabel = new Label("A Site Builder For GitWeb", 43, 150);
-        layoutMain.addComponent(descLabel);
+        recentSitesLabel = new Label("\u00A7n\u00A7lRecent Sites", 273, 29);
+        layoutMain.addComponent(recentSitesLabel);
+
+        sitesList = new ItemList(265, 40, 90, 5);
+        sitesList.setItemClickListener((e, index, mouseButton) -> {
+            if(mouseButton == 0){
+                loadSiteFromListButton.setEnabled(true);
+            }
+        });
+        layoutMain.addComponent(sitesList);
+
+        loadSiteFromListButton = new MenuButton(265, 110 ,90, 16, "Load", Icons.LOAD);
+        loadSiteFromListButton.setEnabled(false);
+        loadSiteFromListButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if(mouseButton == 0){
+                if(sitesList.getSelectedIndex() != -1)
+                {
+                    Sites sites = sitesList.getSelectedItem();
+                    siteBuilderTextArea.setText(sites.getContent().replace("\n\n", "\n"));
+                    currentFile = sites.getSource();
+                    setCurrentLayout(layoutCodeView);
+                }
+            }
+        });
+        layoutMain.addComponent(loadSiteFromListButton);
 
         this.setCurrentLayout(layoutMain);
         /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
-        layoutSettings = new StandardLayout("Settings", 363, 165, this, layoutMain){
+        layoutSettings = new StandardLayout("Settings", 363, 165, this, layoutMain) {
             @Override
             protected void handleUnload() {
                 super.handleUnload();
@@ -243,11 +287,7 @@ public class GWBApp extends Application {
         backToMenuButton1.setToolTip("Back To Menu", "Will take you back to the main menu");
         backToMenuButton1.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-
-                //Todo add function to check if file is saved when back button is pressed and if not saved see if user would like to save
-
                 if (currentFile == null) {
-
                     if (siteBuilderTextArea.getText().isEmpty()) {
                         this.setCurrentLayout(layoutMain);
                     } else {
@@ -271,7 +311,7 @@ public class GWBApp extends Application {
                         saveCheckDialog.setNegativeListener((mouseX1, mouseY1, mouseButton1) -> {
                             System.out.println("Tada");
                             if (mouseButton1 == 0) {
-
+                                siteBuilderTextArea.clear();
                                 this.setCurrentLayout(layoutMain);
                             }
                         });
@@ -317,7 +357,7 @@ public class GWBApp extends Application {
                 data.setString("content", siteBuilderTextArea.getText());
 
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-
+                saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
                     currentFile = file;
                     return true;
@@ -344,7 +384,7 @@ public class GWBApp extends Application {
                     data.setString("content", siteBuilderTextArea.getText());
 
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
-
+                    saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
                         currentFile = file;
                         return true;
@@ -388,7 +428,7 @@ public class GWBApp extends Application {
 
                         OnlineRequest.getInstance().make(importDialog.getTextFieldInput().getText().toString(), (success1, response) -> {
                             if (success1) {
-                                siteBuilderTextArea.setText(unrenderFormatting(response));
+                                siteBuilderTextArea.setText(response.replace("§", "&"));
                             }
                         });
                         importDialog.close();
@@ -533,8 +573,6 @@ public class GWBApp extends Application {
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
 
-        partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
-
         super.render(laptop, mc, x, y, mouseX, mouseY, active, partialTicks);
 
 
@@ -543,8 +581,8 @@ public class GWBApp extends Application {
             {
                 GlStateManager.enableDepth();
                 RenderHelper.enableStandardItemLighting();
-                GlStateManager.translate(x + 150, y - 33, 250);
-                GlStateManager.scale((float) -7.0, (float) -7.0, (float) -7.0);
+                GlStateManager.translate(x + 135, y - 43, 250);
+                GlStateManager.scale((float) -8.0, (float) -8.0, (float) -8.0);
                 GlStateManager.rotate(5F, 1, 0, 0);
                 GlStateManager.rotate(200F, 0, 0, 1);
                 GlStateManager.rotate(-rotationCounter - partialTicks, 0, 1, 0);
@@ -556,6 +594,8 @@ public class GWBApp extends Application {
             }
             GlStateManager.popMatrix();
         }
+
+
 
     }
 
@@ -573,7 +613,8 @@ public class GWBApp extends Application {
                     if (tickCounter == 100) {
                         NBTTagCompound data = new NBTTagCompound();
                         data.setString("content", siteBuilderTextArea.getText());
-                        currentFile.setData(data, (v, success) -> {});
+                        currentFile.setData(data, (v, success) -> {
+                        });
                         tickCounter = 0;
                     }
                     tickCounter++;
@@ -664,7 +705,7 @@ public class GWBApp extends Application {
             }
         }
 
-        if (code == Keyboard.KEY_DELETE) {
+        /*if (code == Keyboard.KEY_DELETE) {
             siteBuilderTextArea.moveCursorRight(1);
             siteBuilderTextArea.performBackspace();
         }*/
@@ -673,6 +714,7 @@ public class GWBApp extends Application {
             if (GuiScreen.isCtrlKeyDown()) {
                 if (code == Keyboard.KEY_LEFT) {
                     if (this.getCurrentLayout().equals(layoutCodeView)) {
+                        liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                         this.setCurrentLayout(layoutLiveView);
                         codeViewCheckBox.setSelected(false);
                         designViewCheckBox.setSelected(false);
@@ -697,6 +739,7 @@ public class GWBApp extends Application {
                         designViewCheckBox.setSelected(true);
                         liveViewCheckBox.setSelected(false);
                     } else if (this.getCurrentLayout().equals(layoutDesignView)) {
+                        liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                         this.setCurrentLayout(layoutLiveView);
                         codeViewCheckBox.setSelected(false);
                         designViewCheckBox.setSelected(false);
@@ -717,7 +760,6 @@ public class GWBApp extends Application {
 
     @Override
     public boolean handleFile(File file) {
-
         if (!PREDICATE_FILE_SITE.test(file))
             return false;
 
@@ -756,6 +798,7 @@ public class GWBApp extends Application {
             autoSave = tagCompound.getBoolean("autoSave");
         }
 
+        //Todo fix issue with autosave in settings
         if (autoSave) {
             autoSaveOnCheckBox.setSelected(true);
         } else {
@@ -777,4 +820,34 @@ public class GWBApp extends Application {
         tagCompound.setBoolean("autoSave", autoSave);
 
     }
+
+    private static class Sites
+    {
+        private File source;
+        private String content;
+
+        public Sites(String content)
+        {
+            this.content = content;
+        }
+
+        public File getSource()
+        {
+            return source;
+        }
+
+        public String getContent()
+        {
+            return content;
+        }
+
+        public static Sites fromFile(File file)
+        {
+            Sites note = new Sites(file.getData().getString("content"));
+            note.source = file;
+            return note;
+        }
+    }
+
+
 }
