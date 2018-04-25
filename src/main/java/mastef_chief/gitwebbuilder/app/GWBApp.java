@@ -3,6 +3,7 @@ package mastef_chief.gitwebbuilder.app;
 import com.mrcrayfish.device.api.app.Application;
 import com.mrcrayfish.device.api.app.Dialog;
 import com.mrcrayfish.device.api.app.Icons;
+import com.mrcrayfish.device.api.app.ScrollableLayout;
 import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.Label;
@@ -14,6 +15,7 @@ import com.mrcrayfish.device.api.utils.OnlineRequest;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
+import com.mrcrayfish.device.programs.gitweb.module.HeaderModule;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.components.MenuButton;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
@@ -547,7 +549,6 @@ public class GWBApp extends Application {
         layoutDesignView.addComponent(designViewCheckBox);
         layoutDesignView.addComponent(liveViewCheckBox);
 
-
         /*---------------------------------------------------------------------------------------------------------------*/
 
         layoutLiveView = new StandardLayout("Live View", 363, 165, this, null);
@@ -562,7 +563,7 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(designViewCheckBox);
         layoutLiveView.addComponent(liveViewCheckBox);
 
-        liveGitWebFrame = new GitWebFrame(this, 0, 21, layoutCodeView.width, layoutCodeView.height - 22);
+        liveGitWebFrame = new GitWebFrame(this, 0, 21, layoutLiveView.width, layoutLiveView.height - 22);
         layoutLiveView.addComponent(liveGitWebFrame);
 
     }
