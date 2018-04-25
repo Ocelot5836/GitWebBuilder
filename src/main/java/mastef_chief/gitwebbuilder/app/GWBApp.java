@@ -14,8 +14,6 @@ import com.mrcrayfish.device.api.utils.OnlineRequest;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
-import com.mrcrayfish.device.programs.gitweb.module.FooterModule;
-import com.mrcrayfish.device.programs.gitweb.module.Module;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.components.MenuButton;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
@@ -30,7 +28,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
@@ -857,6 +854,5 @@ public class GWBApp extends Application {
             return note;
         }
     }
-
 
 }
