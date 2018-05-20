@@ -92,6 +92,8 @@ public class GWBApp extends Application {
     private StandardLayout layoutDesignView;
     private StandardLayout layoutLiveView;
 
+    private ScrollableLayout moduleSelctionLayout;
+
     private MenuButton newSiteButton;
     private MenuButton loadSiteButton;
     private MenuButton settingsButton;
@@ -102,6 +104,19 @@ public class GWBApp extends Application {
     private Button exportToPastebinButton;
     private Button importButton;
     private Button copyToClipboardButton;
+
+    //Module Buttons
+    private Button paragraphModuleButton;
+    private Button navigationModuleButton;
+    private Button brewingModuleButton;
+    private Button downloadModuleButton;
+    private Button furnaceModuleButton;
+    private Button footerModuleButton;
+    private Button dividerModuleButton;
+    private Button craftingModuleButton;
+    private Button anvilModuleButton;
+    private Button headerModuleButton;
+    private Button bannerModuleButton;
 
     //16 Color Buttons
     private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
@@ -482,6 +497,8 @@ public class GWBApp extends Application {
             if (mouseButton == 0) {
                 liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                 this.setCurrentLayout(layoutLiveView);
+
+
             }
         });
         layoutCodeView.addComponent(liveViewCheckBox);
@@ -514,11 +531,14 @@ public class GWBApp extends Application {
                         formattingButton.setVisible(true);
                     }
                     resetButton.setVisible(true);
+                    moduleSelctionLayout.setVisible(false);
                 } else if (newValue.equals("Modules")) {
                     for (Button formattingButton : formattingButtons) {
                         formattingButton.setVisible(false);
                     }
                     resetButton.setVisible(false);
+                    moduleSelctionLayout.setVisible(true);
+                    moduleSelctionLayout.resetScroll();
                 }
             }
         });
@@ -532,6 +552,106 @@ public class GWBApp extends Application {
             }
         });
         layoutCodeView.addComponent(resetButton);
+
+        moduleSelctionLayout = new ScrollableLayout(290, 39, 70, 200, 123);
+        moduleSelctionLayout.setVisible(false);
+        moduleSelctionLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
+        {
+            Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+            gui.drawRect(x, y, x + 100, y + 300, Color.gray.getRGB());
+        });
+        layoutCodeView.addComponent(moduleSelctionLayout);
+
+        paragraphModuleButton = new Button(1, 1, 62, 16, "Paragraph");
+        paragraphModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Paragraph", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(paragraphModuleButton);
+
+        navigationModuleButton = new Button(1, 19, 62, 16, "Navigation");
+        navigationModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Navigation", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(navigationModuleButton);
+
+        brewingModuleButton = new Button(1, 37, 62, 16, "Brewing");
+        brewingModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
+        brewingModuleButton.setEnabled(false);
+        brewingModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Brewing", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(brewingModuleButton);
+
+        downloadModuleButton = new Button(1, 55, 62, 16, "Download");
+        downloadModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Download", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(downloadModuleButton);
+
+        furnaceModuleButton = new Button(1, 73, 62, 16, "Furnace");
+        furnaceModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
+        furnaceModuleButton.setEnabled(false);
+        moduleSelctionLayout.addComponent(furnaceModuleButton);
+
+        footerModuleButton = new Button(1, 91, 62, 16, "Footer");
+        footerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Footer", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(footerModuleButton);
+
+        dividerModuleButton = new Button(1, 109, 62, 16, "Divider");
+        dividerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Divider", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(dividerModuleButton);
+
+        craftingModuleButton = new Button(1, 127, 62, 16, "Crafting");
+        craftingModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
+        craftingModuleButton.setEnabled(false);
+        moduleSelctionLayout.addComponent(craftingModuleButton);
+
+        anvilModuleButton = new Button(1, 145, 62, 16, "Anvil");
+        anvilModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
+        anvilModuleButton.setEnabled(false);
+        moduleSelctionLayout.addComponent(anvilModuleButton);
+
+        headerModuleButton = new Button(1, 163, 62, 16, "Header");
+        headerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Header", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(headerModuleButton);
+
+        bannerModuleButton = new Button(1, 181, 62, 16, "Banner");
+        bannerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Banner", siteBuilderTextArea);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
+        moduleSelctionLayout.addComponent(bannerModuleButton);
+
+
 
         //Todo Add search for code
 
@@ -567,6 +687,8 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(liveGitWebFrame);
 
     }
+
+
 
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
