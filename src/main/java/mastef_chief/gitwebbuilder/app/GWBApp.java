@@ -150,6 +150,7 @@ public class GWBApp extends Application {
     private GWBLogoModel gwbLogoModel = new GWBLogoModel();
 
     private static final ResourceLocation logo = new ResourceLocation("gitwebbuilder:textures/app/gui/logo.png");
+    private static final ResourceLocation ud = new ResourceLocation("gitwebbuilder:textures/app/gui/ud.png");
 
     /**
      * The default initialization method. Clears any components in the default
@@ -161,7 +162,6 @@ public class GWBApp extends Application {
      * your application window.
      */
     @Override
-    public void init() {
     public void init(@Nullable NBTTagCompound nbtTagCompound) {
 
         /*--------------------------------------------------------------------------*/
@@ -695,7 +695,6 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(liveViewCheckBox);
 
         liveGitWebFrame = new GitWebFrame(this, 0, 21, layoutLiveView.width, layoutLiveView.height - 22);
-        layoutLiveView.addComponent(liveGitWebFrame);
 
         layoutLiveView.addComponent(liveGitWebFrame);
     }
@@ -751,7 +750,8 @@ public class GWBApp extends Application {
                     if (tickCounter == 100) {
                         NBTTagCompound data = new NBTTagCompound();
                         data.setString("content", siteBuilderTextArea.getText());
-                        currentFile.setData(data, (v, success) -> {});
+                        currentFile.setData(data, (v, success) -> {
+                        });
                         tickCounter = 0;
                     }
                     tickCounter++;
@@ -915,21 +915,21 @@ public class GWBApp extends Application {
     @Override
     public void onClose() {
         super.onClose();
+
+
+        //Todo add save on close if not saved already
+
+
         currentFile = null;
+
+
     }
 
     private static <T extends Object> T[] asArray(T... t) {
         return t;
     }
 
-    /**
-     * Called when you first load up your application. Allows you to read any
-     * stored data you have saved. Only called if you have saved data. This
-     * method is called after {{@link #init()} so you can update any
-     * Components with this data.
-     *
-     * @param tagCompound the tag compound where you saved data is
-     */
+
     @Override
     public void load(NBTTagCompound tagCompound) {
 
@@ -960,15 +960,11 @@ public class GWBApp extends Application {
 
     }
 
-    private static class Sites
-    {
     private static class Sites {
         private File source;
         private String fileName;
         private String content;
 
-        public Sites(String fileName, String content)
-        {
         public Sites(String fileName, String content) {
             this.fileName = fileName;
             this.content = content;
@@ -990,8 +986,6 @@ public class GWBApp extends Application {
             return this.fileName;
         }
 
-        public static Sites fromFile(File file)
-        {
         public static Sites fromFile(File file) {
             Sites note = new Sites(file.getName(), file.getData().getString("content"));
             note.source = file;
