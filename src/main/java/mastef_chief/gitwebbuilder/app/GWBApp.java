@@ -6,18 +6,20 @@ import com.mrcrayfish.device.api.app.Icons;
 import com.mrcrayfish.device.api.app.ScrollableLayout;
 import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.*;
+import com.mrcrayfish.device.api.app.component.Image;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.interfaces.IHighlight;
 import com.mrcrayfish.device.api.io.File;
 import com.mrcrayfish.device.api.task.TaskManager;
 import com.mrcrayfish.device.api.utils.OnlineRequest;
+import com.mrcrayfish.device.api.utils.RenderUtil;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.core.io.FileSystem;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
-import com.mrcrayfish.device.programs.gitweb.module.HeaderModule;
 import com.mrcrayfish.device.programs.system.layout.StandardLayout;
 import mastef_chief.gitwebbuilder.app.components.MenuButton;
+import mastef_chief.gitwebbuilder.app.components.ModuleCreatorDialog;
 import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
 import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
@@ -26,12 +28,15 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
 import org.lwjgl.input.Keyboard;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -39,8 +44,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 public class GWBApp extends Application {
@@ -131,6 +138,7 @@ public class GWBApp extends Application {
     private Label recentSitesLabel;
     private Label autoSaveLabel;
 
+
     private CheckBox autoSaveOnCheckBox;
     private CheckBox autoSaveOffCheckBox;
     private CheckBox codeViewCheckBox;
@@ -154,6 +162,7 @@ public class GWBApp extends Application {
      */
     @Override
     public void init() {
+    public void init(@Nullable NBTTagCompound nbtTagCompound) {
 
         /*--------------------------------------------------------------------------*/
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
@@ -219,7 +228,7 @@ public class GWBApp extends Application {
         settingsButton = new MenuButton(210, 125, 75, 16, "Settings", Icons.WRENCH);
         settingsButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                this.setCurrentLayout(layoutSettings);
+                //this.setCurrentLayout(layoutSettings);
             }
         });
         layoutMain.addComponent(settingsButton);
@@ -229,18 +238,17 @@ public class GWBApp extends Application {
 
         sitesList = new ItemList(265, 40, 90, 5);
         sitesList.setItemClickListener((e, index, mouseButton) -> {
-            if(mouseButton == 0){
+            if (mouseButton == 0) {
                 loadSiteFromListButton.setEnabled(true);
             }
         });
         layoutMain.addComponent(sitesList);
 
-        loadSiteFromListButton = new MenuButton(265, 110 ,90, 16, "Load", Icons.LOAD);
+        loadSiteFromListButton = new MenuButton(265, 110, 90, 16, "Load", Icons.LOAD);
         loadSiteFromListButton.setEnabled(false);
         loadSiteFromListButton.setClickListener((mouseX, mouseY, mouseButton) -> {
-            if(mouseButton == 0){
-                if(sitesList.getSelectedIndex() != -1)
-                {
+            if (mouseButton == 0) {
+                if (sitesList.getSelectedIndex() != -1) {
                     Sites sites = sitesList.getSelectedItem();
                     siteBuilderTextArea.setText(sites.getContent().replace("\n\n", "\n"));
                     currentFile = sites.getSource();
@@ -323,7 +331,6 @@ public class GWBApp extends Application {
                             }
                         });
                         saveCheckDialog.setNegativeListener((mouseX1, mouseY1, mouseButton1) -> {
-                            System.out.println("Tada");
                             if (mouseButton1 == 0) {
                                 siteBuilderTextArea.clear();
                                 this.setCurrentLayout(layoutMain);
@@ -662,12 +669,16 @@ public class GWBApp extends Application {
         layoutDesignView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
         {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
-            gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
+            gui.drawRect(x, y + 21, x + width, y + 164, Color.darkGray.getRGB());
         });
 
         layoutDesignView.addComponent(codeViewCheckBox);
         layoutDesignView.addComponent(designViewCheckBox);
         layoutDesignView.addComponent(liveViewCheckBox);
+
+
+
+        //Todo work on design view
 
         /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -686,6 +697,7 @@ public class GWBApp extends Application {
         liveGitWebFrame = new GitWebFrame(this, 0, 21, layoutLiveView.width, layoutLiveView.height - 22);
         layoutLiveView.addComponent(liveGitWebFrame);
 
+        layoutLiveView.addComponent(liveGitWebFrame);
     }
 
 
@@ -715,6 +727,12 @@ public class GWBApp extends Application {
             GlStateManager.popMatrix();
         }
 
+        if (this.getCurrentLayout() == layoutDesignView) {
+
+            mc.getTextureManager().bindTexture(ud);
+            RenderUtil.drawRectWithTexture((double) (x + 46), (double) (y + 19), 0.0F, 0.0F, 250, 145, 250, 250);
+
+        }
 
 
     }
@@ -944,12 +962,14 @@ public class GWBApp extends Application {
 
     private static class Sites
     {
+    private static class Sites {
         private File source;
         private String fileName;
         private String content;
 
         public Sites(String fileName, String content)
         {
+        public Sites(String fileName, String content) {
             this.fileName = fileName;
             this.content = content;
         }
@@ -972,6 +992,7 @@ public class GWBApp extends Application {
 
         public static Sites fromFile(File file)
         {
+        public static Sites fromFile(File file) {
             Sites note = new Sites(file.getName(), file.getData().getString("content"));
             note.source = file;
             return note;
