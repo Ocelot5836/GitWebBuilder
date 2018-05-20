@@ -502,7 +502,15 @@ public class GWBApp extends Application {
         liveViewCheckBox.setRadioGroup(viewGroup);
         liveViewCheckBox.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
+                try {
+                    liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
+
+                } catch (NumberFormatException e) {
+                    this.openDialog(new Dialog.Message(TextFormatting.RED + "Error \n" + TextFormatting.RESET + e.getLocalizedMessage() + "\nCheck logs for more info." ));
+                    e.printStackTrace();
+
+                }
+
                 this.setCurrentLayout(layoutLiveView);
 
 
