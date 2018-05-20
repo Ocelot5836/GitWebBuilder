@@ -12,7 +12,9 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiConfirmOpenLink;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiYesNoCallback;
+import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -35,14 +37,12 @@ public class PasteBinCompleteDialog extends Dialog{
     }
 
     @Override
-    public void init()
+    public void init(@Nullable NBTTagCompound nbtTagCompound)
     {
-        super.init();
+        super.init(nbtTagCompound);
 
         int lines = Minecraft.getMinecraft().fontRenderer.listFormattedStringToWidth("Link: " + messageText, getWidth() - 10).size();
         defaultLayout.height += (lines - 1) * 9;
-
-        super.init();
 
         defaultLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
         {
