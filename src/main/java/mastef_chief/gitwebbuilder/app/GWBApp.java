@@ -49,6 +49,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 
 public class GWBApp extends Application {
 
@@ -206,7 +207,7 @@ public class GWBApp extends Application {
                 {
                     if (file.isForApplication(this)) {
                         NBTTagCompound data = file.getData();
-                        siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
+                        siteBuilderTextArea.setText(data.getString("content"));
                         currentFile = file;
                         //Todo Testing Code
                         /*saveSiteButton.setEnabled(false);
@@ -436,7 +437,7 @@ public class GWBApp extends Application {
         layoutCodeView.addComponent(exportToPastebinButton);
 
         importButton = new Button(172, 2, Icons.IMPORT);
-        importButton.setToolTip("Import", "Import an existing site into GitWeb Builder");
+        importButton.setToolTip("Import", "Import an existing Gitweb site into GitWeb Builder");
         importButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
 
@@ -447,12 +448,8 @@ public class GWBApp extends Application {
                 importDialog.setResponseHandler((success, s) -> {
                     if (success) {
 
-                        OnlineRequest.getInstance().make(importDialog.getTextFieldInput().getText().toString(), (success1, response) -> {
-                            if (success1) {
-                                siteBuilderTextArea.setText(response.replace("§", "&"));
-                            }
-                        });
-                        importDialog.close();
+                        getWebsite(importDialog.getTextFieldInput().getText());
+
                     }
                     return false;
                 });
@@ -504,11 +501,9 @@ public class GWBApp extends Application {
             if (mouseButton == 0) {
                 try {
                     liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
-
-                } catch (NumberFormatException e) {
+                } catch (Throwable e) {
                     this.openDialog(new Dialog.Message(TextFormatting.RED + "Error \n" + TextFormatting.RESET + e.getLocalizedMessage() + "\nCheck logs for more info." ));
                     e.printStackTrace();
-
                 }
 
                 this.setCurrentLayout(layoutLiveView);
@@ -580,7 +575,7 @@ public class GWBApp extends Application {
         paragraphModuleButton = new Button(1, 1, 62, 16, "Paragraph");
         paragraphModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Paragraph", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Paragraph", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -589,7 +584,7 @@ public class GWBApp extends Application {
         navigationModuleButton = new Button(1, 19, 62, 16, "Navigation");
         navigationModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Navigation", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Navigation", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -600,7 +595,7 @@ public class GWBApp extends Application {
         brewingModuleButton.setEnabled(false);
         brewingModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Brewing", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Brewing", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -609,7 +604,7 @@ public class GWBApp extends Application {
         downloadModuleButton = new Button(1, 55, 62, 16, "Download");
         downloadModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Download", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Download", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -623,7 +618,7 @@ public class GWBApp extends Application {
         footerModuleButton = new Button(1, 91, 62, 16, "Footer");
         footerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Footer", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Footer", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -632,7 +627,7 @@ public class GWBApp extends Application {
         dividerModuleButton = new Button(1, 109, 62, 16, "Divider");
         dividerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Divider", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Divider", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -651,7 +646,7 @@ public class GWBApp extends Application {
         headerModuleButton = new Button(1, 163, 62, 16, "Header");
         headerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Header", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Header", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -660,7 +655,7 @@ public class GWBApp extends Application {
         bannerModuleButton = new Button(1, 181, 62, 16, "Banner");
         bannerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Banner", siteBuilderTextArea);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Banner", siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -913,7 +908,7 @@ public class GWBApp extends Application {
         currentFile = file;
 
         NBTTagCompound data = file.getData();
-        siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n"));
+        siteBuilderTextArea.setText(data.getString("content").replace("\n\n", "\n").replace("&nl", "\n"));
         this.setCurrentLayout(layoutCodeView);
 
         return true;
@@ -931,6 +926,43 @@ public class GWBApp extends Application {
         currentFile = null;
 
 
+    }
+
+
+    private void getWebsite(String website)
+    {
+
+
+        Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
+
+        String domain = matcher.group("domain");
+        String extension = matcher.group("extension");
+        String directory = matcher.group("directory");
+        String url;
+
+        if(directory == null)
+        {
+            url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + "/index";
+        }
+        else
+        {
+            if(directory.endsWith("/"))
+            {
+                directory = directory.substring(0, directory.length() - 1);
+            }
+            url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + directory + "/index";
+        }
+
+
+        this.getCode(url);
+    }
+
+    private void getCode(String url)
+    {
+        OnlineRequest.getInstance().make(url, (success, response) ->
+        {
+            System.out.println(response);
+        });
     }
 
     private static <T extends Object> T[] asArray(T... t) {

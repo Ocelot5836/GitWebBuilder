@@ -1,9 +1,8 @@
 package mastef_chief.gitwebbuilder.app.components;
 
+import com.mrcrayfish.device.api.app.*;
 import com.mrcrayfish.device.api.app.Component;
 import com.mrcrayfish.device.api.app.Dialog;
-import com.mrcrayfish.device.api.app.Layout;
-import com.mrcrayfish.device.api.app.ScrollableLayout;
 import com.mrcrayfish.device.api.app.component.Button;
 import com.mrcrayfish.device.api.app.component.Label;
 import com.mrcrayfish.device.api.app.component.*;
@@ -21,10 +20,13 @@ import org.lwjgl.Sys;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.lang.System;
 
 public class ModuleCreatorDialog extends Dialog {
 
     private static final int DIVIDE_WIDTH = 15;
+
+    private Application application;
 
     private String selectedModule = null;
     private String inputText = "";
@@ -51,10 +53,11 @@ public class ModuleCreatorDialog extends Dialog {
     public static final int LAYOUT_WIDTH = 175;
     public static final int LAYOUT_HEIGHT = 150;
 
-    public ModuleCreatorDialog(String module, TextArea textArea) {
+    public ModuleCreatorDialog(String module, TextArea textArea, Application application) {
 
         this.selectedModule = module;
         this.selectedTextArea = textArea;
+        this.application = application;
     }
 
 
@@ -664,6 +667,8 @@ public class ModuleCreatorDialog extends Dialog {
 
         if(selectedModule == "Download"){
 
+
+
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 130, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
@@ -695,6 +700,25 @@ public class ModuleCreatorDialog extends Dialog {
 
 
             layout.addComponent(scrollableLayout);
+
+
+            Dialog.OpenFile openFile = new Dialog.OpenFile(application);
+            openFile.setResponseHandler((success, file) ->
+            {
+
+                if(success){
+                    fileAppTextField.writeText(file.getOpeningApp());
+                    fileDataTextField.writeText(file.getData().toString());
+                    fileNameTextField.writeText(file.getName());
+                    buttonPositive.setEnabled(true);
+
+                    return true;
+                }
+                return false;
+
+            });
+
+            application.openDialog(openFile);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
             buttonPositive = new Button(125, 130, positiveText){

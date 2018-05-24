@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.0"
+version = "1.1"
 group = "mastef_chief.gitwebbuilder" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "GitWeb Builder"
 
@@ -33,14 +33,14 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-repositories {
+/*repositories {
     maven { url = "https://mrcrayfish.com/maven" }
-}
+}*/
 
 dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile "com.mrcrayfish:device-api:0.4.0-1.12.2"
+    //compile "com.mrcrayfish:device-api:0.4.0-1.12.2"
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
