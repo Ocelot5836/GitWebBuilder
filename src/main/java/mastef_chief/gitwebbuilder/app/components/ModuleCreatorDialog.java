@@ -17,10 +17,13 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.lang.System;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ModuleCreatorDialog extends Dialog {
 
@@ -86,31 +89,47 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label textLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Text:", 5, 8);
             scrollableLayout.addComponent(textLabel);
-            TextField textTextField = new TextField(5, 20, 162);
+            TextArea textTextField = new TextArea(5, 20, 162, 35);
             scrollableLayout.addComponent(textTextField);
 
-            Label paddingLabel = new Label("Padding:", 5, 40);
+            Label paddingLabel = new Label("Padding (Max 178):", 5, 60);
             scrollableLayout.addComponent(paddingLabel);
-            TextField paddingTextField = new TextField(5, 52, 162);
+            TextField paddingTextField = new TextField(5, 72, 162) {
+                @Override
+                public void handleKeyTyped(char character, int code) {
+                    if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
+                        super.handleKeyTyped(character, code);
+                    }
+                }
+            };
             scrollableLayout.addComponent(paddingTextField);
 
 
-            Label imageLabel = new Label("Image Link:", 5, 72);
+            Label imageLabel = new Label("Image Link (Requires Valid URL):", 5, 90);
             scrollableLayout.addComponent(imageLabel);
-            TextField imageTextField = new TextField(5, 84, 162);
+            TextField imageTextField = new TextField(5, 102, 162);
             scrollableLayout.addComponent(imageTextField);
 
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!textTextField.getText().isEmpty()){
-                        buttonPositive.setEnabled(true);
-                    }else {
+                    if (!textTextField.getText().isEmpty()) {
+                        if(!imageTextField.getText().isEmpty()){
+                            if(IsMatch(imageTextField.getText())) {
+                                buttonPositive.setEnabled(true);
+                            }else {
+                                buttonPositive.setEnabled(false);
+                            }
+                        }else{
+                            buttonPositive.setEnabled(true);
+                        }
+
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -121,20 +140,22 @@ public class ModuleCreatorDialog extends Dialog {
             buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
             {
                 if (mouseButton == 0) {
+
+                    selectedTextArea.performReturn();
+                    selectedTextArea.writeText("#paragraph");
+                    selectedTextArea.performReturn();
+                    selectedTextArea.writeText("text=" + textTextField.getText().replace("\n\n", "\\n"));
+                    if (!paddingTextField.getText().isEmpty()) {
                         selectedTextArea.performReturn();
-                        selectedTextArea.writeText("#paragraph");
-                        selectedTextArea.performReturn();
-                        selectedTextArea.writeText("text=" + textTextField.getText());
-                        if (!paddingTextField.getText().isEmpty()) {
-                            selectedTextArea.performReturn();
-                            selectedTextArea.writeText("padding=" + paddingTextField.getText());
-                        }
-                        if (!imageTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("padding=" + paddingTextField.getText());
+                    }
+                    if (!imageTextField.getText().isEmpty()) {
                             selectedTextArea.performReturn();
                             selectedTextArea.writeText("image=" + imageTextField.getText());
-                        }
-                        selectedTextArea.performReturn();
-                        close();
+
+                    }
+                    selectedTextArea.performReturn();
+                    close();
 
                 }
             });
