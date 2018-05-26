@@ -388,14 +388,14 @@ public class ModuleCreatorDialog extends Dialog {
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!menuItemLink1TextField.getText().isEmpty() && !menuItemLabel1TextField.getText().isEmpty() || !menuItemIcon1TextField.getText().isEmpty()){
+                    if (!menuItemLink1TextField.getText().isEmpty() && !menuItemLabel1TextField.getText().isEmpty() || !menuItemIcon1TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -583,7 +583,7 @@ public class ModuleCreatorDialog extends Dialog {
 
         }
 
-        if(selectedModule == "Brewing"){
+        if (selectedModule == "Brewing") {
 
             /*ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 220, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
@@ -683,11 +683,9 @@ public class ModuleCreatorDialog extends Dialog {
             layout.addComponent(buttonNegative);*/
 
 
-
         }
 
-        if(selectedModule == "Download"){
-
+        if (selectedModule == "Download") {
 
 
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 130, LAYOUT_HEIGHT - 25);
@@ -719,7 +717,6 @@ public class ModuleCreatorDialog extends Dialog {
             scrollableLayout.addComponent(textTextField);
 
 
-
             layout.addComponent(scrollableLayout);
 
 
@@ -727,9 +724,10 @@ public class ModuleCreatorDialog extends Dialog {
             openFile.setResponseHandler((success, file) ->
             {
 
-                if(success){
+                if (success) {
                     fileAppTextField.writeText(file.getOpeningApp());
-                    fileDataTextField.writeText(file.getData().toString());
+                    String data = file.getData().toString().replace("\n\n", "\\\\n");
+                    fileDataTextField.writeText(data);
                     fileNameTextField.writeText(file.getName());
                     buttonPositive.setEnabled(true);
 
@@ -742,14 +740,14 @@ public class ModuleCreatorDialog extends Dialog {
             application.openDialog(openFile);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!fileAppTextField.getText().isEmpty() && !fileDataTextField.getText().isEmpty()){
+                    if (!fileAppTextField.getText().isEmpty() && !fileDataTextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -769,11 +767,11 @@ public class ModuleCreatorDialog extends Dialog {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("file-data=" + fileDataTextField.getText());
                     selectedTextArea.performReturn();
-                    if(!fileNameTextField.getText().isEmpty()){
+                    if (!fileNameTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("file-name=" + fileNameTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if(!textTextField.getText().isEmpty()){
+                    if (!textTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("text=" + textTextField.getText());
                         selectedTextArea.performReturn();
                     }
@@ -795,7 +793,7 @@ public class ModuleCreatorDialog extends Dialog {
         }
 
 
-        if(selectedModule == "Footer"){
+        if (selectedModule == "Footer") {
 
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 160, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
@@ -866,18 +864,17 @@ public class ModuleCreatorDialog extends Dialog {
             scrollableLayout.addComponent(colorDisplay);
 
 
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!titleTextField.getText().isEmpty() && !subtitleTextField.getText().isEmpty() && !homePageLinkTextField.getText().isEmpty()){
+                    if (!titleTextField.getText().isEmpty() && !subtitleTextField.getText().isEmpty() && !homePageLinkTextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -919,7 +916,7 @@ public class ModuleCreatorDialog extends Dialog {
 
         }
 
-        if(selectedModule == "Divider"){
+        if (selectedModule == "Divider") {
 
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 120, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
@@ -980,18 +977,17 @@ public class ModuleCreatorDialog extends Dialog {
             scrollableLayout.addComponent(colorDisplay);
 
 
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!sizeTextField.getText().isEmpty()){
+                    if (!sizeTextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -1030,7 +1026,7 @@ public class ModuleCreatorDialog extends Dialog {
 
         }
 
-        if(selectedModule == "Header"){
+        if (selectedModule == "Header") {
 
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 125, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
@@ -1063,14 +1059,14 @@ public class ModuleCreatorDialog extends Dialog {
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!textTextField.getText().isEmpty()){
+                    if (!textTextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -1086,15 +1082,15 @@ public class ModuleCreatorDialog extends Dialog {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("text=" + textTextField.getText());
                     selectedTextArea.performReturn();
-                    if(!scaleTextField.getText().isEmpty()){
+                    if (!scaleTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("scale=" + scaleTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if(!paddingTextField.getText().isEmpty()){
+                    if (!paddingTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("padding=" + paddingTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if(!alignTextField.getText().isEmpty()){
+                    if (!alignTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("align=" + alignTextField.getText());
                         selectedTextArea.performReturn();
                     }
@@ -1116,7 +1112,7 @@ public class ModuleCreatorDialog extends Dialog {
 
         }
 
-        if(selectedModule == "Banner"){
+        if (selectedModule == "Banner") {
 
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 125, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
@@ -1140,14 +1136,14 @@ public class ModuleCreatorDialog extends Dialog {
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
-            buttonPositive = new Button(125, 130, positiveText){
+            buttonPositive = new Button(125, 130, positiveText) {
                 @Override
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!imageTextField.getText().isEmpty()){
+                    if (!imageTextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -1163,7 +1159,7 @@ public class ModuleCreatorDialog extends Dialog {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("image=" + imageTextField.getText());
                     selectedTextArea.performReturn();
-                    if(!textTextField.getText().isEmpty()){
+                    if (!textTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("text=" + textTextField.getText());
                     }
 
