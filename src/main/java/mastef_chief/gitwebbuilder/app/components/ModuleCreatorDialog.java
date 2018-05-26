@@ -1189,5 +1189,14 @@ public class ModuleCreatorDialog extends Dialog {
 
     }
 
+    private static boolean IsMatch(String s) {
+        try {
+            Pattern patt = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+            Matcher matcher = patt.matcher(s);
+            return matcher.matches();
+        } catch (RuntimeException e) {
+            return false;
+        }
 
+    }
 }
