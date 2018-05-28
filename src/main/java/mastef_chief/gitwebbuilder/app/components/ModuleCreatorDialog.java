@@ -9,9 +9,14 @@ import com.mrcrayfish.device.api.app.component.*;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.component.TextField;
 import com.mrcrayfish.device.api.app.listener.SlideListener;
+import com.mrcrayfish.device.api.utils.OnlineRequest;
 import com.mrcrayfish.device.api.utils.RenderUtil;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.object.ColorGrid;
+import com.mrcrayfish.device.programs.ApplicationIcons;
+import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
+import com.mrcrayfish.device.programs.system.layout.StandardLayout;
+import mastef_chief.gitwebbuilder.app.GWBApp;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
@@ -174,12 +179,12 @@ public class ModuleCreatorDialog extends Dialog {
 
         if (selectedModule == "Navigation") {
 
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 1060, LAYOUT_HEIGHT - 25);
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 1080, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
             {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
-                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 1060, Color.gray.getRGB());
+                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 1080, Color.gray.getRGB());
             });
 
             Text colorLabel = new Text(TextFormatting.RESET + "Menu \nColor:", 10, 15, 60);
@@ -239,8 +244,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon1Label = new Label("Menu Item Icon (1):", 5, 130);
             scrollableLayout.addComponent(menuItemIcon1Label);
-            TextField menuItemIcon1TextField = new TextField(5, 140, 162);
-            scrollableLayout.addComponent(menuItemIcon1TextField);
+            Button menuItemIcon1Button = new Button(152, 147, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon1Button);
+            ItemList<IIcon> menuItemIcon1List = new ItemList(5, 140, 140, 2);
+            getIcons(menuItemIcon1List);
+            menuItemIcon1List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon1Button.setIcon(menuItemIcon1List.getSelectedItem());
+                    if(!menuItemLink1TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon1List);
 
 
             Label menuItemLink2Label = new Label("Menu Item Link (2):", 5, 170);
@@ -255,8 +273,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon2Label = new Label("Menu Item Icon (2):", 5, 230);
             scrollableLayout.addComponent(menuItemIcon2Label);
-            TextField menuItemIcon2TextField = new TextField(5, 240, 162);
-            scrollableLayout.addComponent(menuItemIcon2TextField);
+            Button menuItemIcon2Button = new Button(152, 247, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon2Button);
+            ItemList<IIcon> menuItemIcon2List = new ItemList(5, 240, 140, 2);
+            getIcons(menuItemIcon2List);
+            menuItemIcon2List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon2Button.setIcon(menuItemIcon2List.getSelectedItem());
+                    if(!menuItemLink2TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon2List);
 
 
             Label menuItemLink3Label = new Label("Menu Item Link (3):", 5, 270);
@@ -271,8 +302,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon3Label = new Label("Menu Item Icon (3):", 5, 330);
             scrollableLayout.addComponent(menuItemIcon3Label);
-            TextField menuItemIcon3TextField = new TextField(5, 340, 162);
-            scrollableLayout.addComponent(menuItemIcon3TextField);
+            Button menuItemIcon3Button = new Button(152, 347, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon3Button);
+            ItemList<IIcon> menuItemIcon3List = new ItemList(5, 340, 140, 2);
+            getIcons(menuItemIcon3List);
+            menuItemIcon3List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon3Button.setIcon(menuItemIcon3List.getSelectedItem());
+                    if(!menuItemLink3TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon3List);
 
 
             Label menuItemLink4Label = new Label("Menu Item Link (4):", 5, 370);
@@ -287,8 +331,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon4Label = new Label("Menu Item Icon (4):", 5, 430);
             scrollableLayout.addComponent(menuItemIcon4Label);
-            TextField menuItemIcon4TextField = new TextField(5, 440, 162);
-            scrollableLayout.addComponent(menuItemIcon4TextField);
+            Button menuItemIcon4Button = new Button(152, 447, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon4Button);
+            ItemList<IIcon> menuItemIcon4List = new ItemList(5, 440, 140, 2);
+            getIcons(menuItemIcon4List);
+            menuItemIcon4List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon4Button.setIcon(menuItemIcon4List.getSelectedItem());
+                    if(!menuItemLink4TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon4List);
 
 
             Label menuItemLink5Label = new Label("Menu Item Link (5):", 5, 470);
@@ -303,8 +360,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon5Label = new Label("Menu Item Icon (5):", 5, 530);
             scrollableLayout.addComponent(menuItemIcon5Label);
-            TextField menuItemIcon5TextField = new TextField(5, 540, 162);
-            scrollableLayout.addComponent(menuItemIcon5TextField);
+            Button menuItemIcon5Button = new Button(152, 547, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon5Button);
+            ItemList<IIcon> menuItemIcon5List = new ItemList(5, 540, 140, 2);
+            getIcons(menuItemIcon5List);
+            menuItemIcon5List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon5Button.setIcon(menuItemIcon5List.getSelectedItem());
+                    if(!menuItemLink5TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon5List);
 
 
             Label menuItemLink6Label = new Label("Menu Item Link (6):", 5, 570);
@@ -319,8 +389,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon6Label = new Label("Menu Item Icon (6):", 5, 630);
             scrollableLayout.addComponent(menuItemIcon6Label);
-            TextField menuItemIcon6TextField = new TextField(5, 640, 162);
-            scrollableLayout.addComponent(menuItemIcon6TextField);
+            Button menuItemIcon6Button = new Button(152, 647, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon6Button);
+            ItemList<IIcon> menuItemIcon6List = new ItemList(5, 640, 140, 2);
+            getIcons(menuItemIcon6List);
+            menuItemIcon6List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon6Button.setIcon(menuItemIcon6List.getSelectedItem());
+                    if(!menuItemLink6TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon6List);
 
 
             Label menuItemLink7Label = new Label("Menu Item Link (7):", 5, 670);
@@ -335,8 +418,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon7Label = new Label("Menu Item Icon (7):", 5, 730);
             scrollableLayout.addComponent(menuItemIcon7Label);
-            TextField menuItemIcon7TextField = new TextField(5, 740, 162);
-            scrollableLayout.addComponent(menuItemIcon7TextField);
+            Button menuItemIcon7Button = new Button(152, 747, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon7Button);
+            ItemList<IIcon> menuItemIcon7List = new ItemList(5, 740, 140, 2);
+            getIcons(menuItemIcon7List);
+            menuItemIcon7List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon7Button.setIcon(menuItemIcon7List.getSelectedItem());
+                    if(!menuItemLink7TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon7List);
 
 
             Label menuItemLink8Label = new Label("Menu Item Link (8):", 5, 770);
@@ -351,8 +447,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon8Label = new Label("Menu Item Icon (8):", 5, 830);
             scrollableLayout.addComponent(menuItemIcon8Label);
-            TextField menuItemIcon8TextField = new TextField(5, 840, 162);
-            scrollableLayout.addComponent(menuItemIcon8TextField);
+            Button menuItemIcon8Button = new Button(152, 847, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon8Button);
+            ItemList<IIcon> menuItemIcon8List = new ItemList(5, 840, 140, 2);
+            getIcons(menuItemIcon8List);
+            menuItemIcon8List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon8Button.setIcon(menuItemIcon8List.getSelectedItem());
+                    if(!menuItemLink8TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon8List);
 
 
             Label menuItemLink9Label = new Label("Menu Item Link (9):", 5, 870);
@@ -367,8 +476,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon9Label = new Label("Menu Item Icon (9):", 5, 930);
             scrollableLayout.addComponent(menuItemIcon9Label);
-            TextField menuItemIcon9TextField = new TextField(5, 940, 162);
-            scrollableLayout.addComponent(menuItemIcon9TextField);
+            Button menuItemIcon9Button = new Button(152, 947, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon9Button);
+            ItemList<IIcon> menuItemIcon9List = new ItemList(5, 940, 140, 2);
+            getIcons(menuItemIcon9List);
+            menuItemIcon9List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon9Button.setIcon(menuItemIcon9List.getSelectedItem());
+                    if(!menuItemLink9TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon9List);
 
             Label menuItemLink10Label = new Label("Menu Item Link (10):", 5, 970);
             scrollableLayout.addComponent(menuItemLink10Label);
@@ -382,8 +504,21 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label menuItemIcon10Label = new Label("Menu Item Icon (10):", 5, 1030);
             scrollableLayout.addComponent(menuItemIcon10Label);
-            TextField menuItemIcon10TextField = new TextField(5, 1040, 162);
-            scrollableLayout.addComponent(menuItemIcon10TextField);
+            Button menuItemIcon10Button = new Button(152, 1047, 16, 16, "");
+            scrollableLayout.addComponent(menuItemIcon10Button);
+            ItemList<IIcon> menuItemIcon10List = new ItemList(5, 1040, 140, 2);
+            getIcons(menuItemIcon10List);
+            menuItemIcon10List.setItemClickListener((e, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    menuItemIcon10Button.setIcon(menuItemIcon10List.getSelectedItem());
+                    if(!menuItemLink10TextField.getText().isEmpty()){
+                        buttonPositive.setEnabled(true);
+                    }else {
+                        buttonPositive.setEnabled(false);
+                    }
+                }
+            });
+            scrollableLayout.addComponent(menuItemIcon10List);
 
             layout.addComponent(scrollableLayout);
 
@@ -393,7 +528,7 @@ public class ModuleCreatorDialog extends Dialog {
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if (!menuItemLink1TextField.getText().isEmpty() && !menuItemLabel1TextField.getText().isEmpty() || !menuItemIcon1TextField.getText().isEmpty()) {
+                    if (!menuItemLink1TextField.getText().isEmpty() && !menuItemLabel1TextField.getText().isEmpty() || menuItemIcon1List.getSelectedItem() != null) {
                         buttonPositive.setEnabled(true);
                     } else {
                         buttonPositive.setEnabled(false);
@@ -420,12 +555,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-1=" + menuItemLabel1TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon1TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-1=" + menuItemIcon1TextField.getText().toUpperCase());
+                        if (menuItemIcon1List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-1=" + menuItemIcon1List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel1TextField.getText().isEmpty() && menuItemIcon1TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (1) requires either a label or a icon."));
                         }
                     }
 
@@ -436,12 +568,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-2=" + menuItemLabel2TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon2TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-2=" + menuItemIcon2TextField.getText().toUpperCase());
+                        if (menuItemIcon2List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-2=" + menuItemIcon2List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel2TextField.getText().isEmpty() && menuItemIcon2TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (2) requires either a label or a icon."));
                         }
                     }
 
@@ -452,12 +581,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-3=" + menuItemLabel3TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon3TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-3=" + menuItemIcon3TextField.getText().toUpperCase());
+                        if (menuItemIcon3List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-3=" + menuItemIcon3List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel3TextField.getText().isEmpty() && menuItemIcon3TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (3) requires either a label or a icon."));
                         }
                     }
 
@@ -468,12 +594,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-4=" + menuItemLabel4TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon4TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-4=" + menuItemIcon4TextField.getText().toUpperCase());
+                        if (menuItemIcon4List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-4=" + menuItemIcon4List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel4TextField.getText().isEmpty() && menuItemIcon4TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (4) requires either a label or a icon."));
                         }
                     }
 
@@ -484,13 +607,11 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-5=" + menuItemLabel5TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon5TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-5=" + menuItemIcon5TextField.getText().toUpperCase());
+                        if (menuItemIcon5List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-5=" + menuItemIcon5List.getSelectedItem());
                             selectedTextArea.performReturn();
                         }
-                        if (menuItemLabel5TextField.getText().isEmpty() && menuItemIcon5TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (5) requires either a label or a icon."));
-                        }
+
                     }
 
                     if (!menuItemLink6TextField.getText().isEmpty()) {
@@ -500,13 +621,11 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-6=" + menuItemLabel6TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon6TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-6=" + menuItemIcon6TextField.getText().toUpperCase());
+                        if (menuItemIcon6List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-6=" + menuItemIcon6List.getSelectedItem());
                             selectedTextArea.performReturn();
                         }
-                        if (menuItemLabel6TextField.getText().isEmpty() && menuItemIcon6TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (6) requires either a label or a icon."));
-                        }
+
                     }
 
                     if (!menuItemLink7TextField.getText().isEmpty()) {
@@ -516,12 +635,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-7=" + menuItemLabel7TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon7TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-7=" + menuItemIcon7TextField.getText().toUpperCase());
+                        if (menuItemIcon7List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-7=" + menuItemIcon7List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel7TextField.getText().isEmpty() && menuItemIcon7TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (7) requires either a label or a icon."));
                         }
                     }
 
@@ -532,12 +648,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-8=" + menuItemLabel8TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon8TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-8=" + menuItemIcon8TextField.getText().toUpperCase());
+                        if (menuItemIcon8List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-8=" + menuItemIcon8List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel8TextField.getText().isEmpty() && menuItemIcon8TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (8) requires either a label or a icon."));
                         }
                     }
 
@@ -548,12 +661,9 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-9=" + menuItemLabel9TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon9TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-9=" + menuItemIcon9TextField.getText().toUpperCase());
+                        if (menuItemIcon9List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-9=" + menuItemIcon9List.getSelectedItem());
                             selectedTextArea.performReturn();
-                        }
-                        if (menuItemLabel9TextField.getText().isEmpty() && menuItemIcon9TextField.getText().isEmpty()) {
-                            this.openDialog(new Message("Menu Item (9) requires either a label or a icon."));
                         }
                     }
 
@@ -564,8 +674,8 @@ public class ModuleCreatorDialog extends Dialog {
                             selectedTextArea.writeText("item-label-10=" + menuItemLabel10TextField.getText());
                             selectedTextArea.performReturn();
                         }
-                        if (!menuItemIcon10TextField.getText().isEmpty()) {
-                            selectedTextArea.writeText("item-icon-10=" + menuItemIcon10TextField.getText().toUpperCase());
+                        if (menuItemIcon10List.getSelectedItem() != null) {
+                            selectedTextArea.writeText("item-icon-10=" + menuItemIcon10List.getSelectedItem());
                             selectedTextArea.performReturn();
                         }
                     }
@@ -1185,7 +1295,57 @@ public class ModuleCreatorDialog extends Dialog {
 
     }
 
-    private static boolean IsMatch(String s) {
+    private void getIcons(ItemList itemList){
+        ApplicationIcons.IconSet iconSet = new ApplicationIcons.IconSet("Standard Icons", Icons.values());
+        for(int i = 0; i < 126 && i < iconSet.getIcons().length; ++i) {
+            Enum<? extends IIcon> anEnum = iconSet.getIcons()[i];
+            IIcon icon = (IIcon)anEnum;
+            itemList.addItem(icon);
+        }
+        ApplicationIcons.IconSet alphabetSet = new ApplicationIcons.IconSet("Alphabet", Alphabet.values());
+        for(int i = 0; i < 126 && i < alphabetSet.getIcons().length; ++i) {
+            Enum<? extends IIcon> anEnum = alphabetSet.getIcons()[i];
+            IIcon icon = (IIcon)anEnum;
+            itemList.addItem(icon);
+        }
+    }
+
+    public static class IconSet {
+        private String name;
+        private Enum<? extends IIcon>[] icons;
+
+        public IconSet(String name, Enum<? extends IIcon>[] icons) {
+            this.name = name;
+            this.icons = icons;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public Enum<? extends IIcon>[] getIcons() {
+            return this.icons;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+    }
+
+
+    public boolean isGitwebSite(String website){
+
+            Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
+
+            if(!matcher.matches()){
+                return false;
+            }else {
+                return true;
+            }
+
+    }
+
+    private boolean IsMatch(String s) {
         try {
             Pattern patt = Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
             Matcher matcher = patt.matcher(s);
