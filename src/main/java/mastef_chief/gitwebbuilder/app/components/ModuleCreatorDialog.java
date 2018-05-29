@@ -1038,7 +1038,14 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label sizeLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Size:", 5, 8);
             scrollableLayout.addComponent(sizeLabel);
-            TextField sizeTextField = new TextField(5, 18, 162);
+            TextField sizeTextField = new TextField(5, 18, 162){
+                @Override
+                public void handleKeyTyped(char character, int code) {
+                    if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
+                        super.handleKeyTyped(character, code);
+                    }
+                }
+            };
             scrollableLayout.addComponent(sizeTextField);
 
             Label colorLabel = new Label("Color:", 5, 38);
@@ -1138,12 +1145,12 @@ public class ModuleCreatorDialog extends Dialog {
 
         if (selectedModule == "Header") {
 
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 125, LAYOUT_HEIGHT - 25);
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 150, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
             {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
-                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + LAYOUT_HEIGHT - 25, Color.gray.getRGB());
+                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 150, Color.gray.getRGB());
             });
 
             Label textLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Text:", 5, 8);
@@ -1153,18 +1160,34 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label scaleLabel = new Label("Scale:", 5, 38);
             scrollableLayout.addComponent(scaleLabel);
-            TextField scaleTextField = new TextField(5, 48, 162);
+            TextField scaleTextField = new TextField(5, 48, 162){
+                @Override
+                public void handleKeyTyped(char character, int code) {
+                    if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
+                        super.handleKeyTyped(character, code);
+                    }
+                }
+            };
             scrollableLayout.addComponent(scaleTextField);
 
             Label paddingLabel = new Label("Padding:", 5, 68);
             scrollableLayout.addComponent(paddingLabel);
-            TextField paddingTextField = new TextField(5, 78, 162);
+            TextField paddingTextField = new TextField(5, 78, 162){
+                @Override
+                public void handleKeyTyped(char character, int code) {
+                    if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
+                        super.handleKeyTyped(character, code);
+                    }
+                }
+            };
             scrollableLayout.addComponent(paddingTextField);
 
             Label alignLabel = new Label("Align:", 5, 98);
             scrollableLayout.addComponent(alignLabel);
-            TextField alignTextField = new TextField(5, 108, 162);
-            scrollableLayout.addComponent(alignTextField);
+            ItemList<String> alignList = new ItemList(5, 108, 50, 2);
+            alignList.addItem("Left");
+            alignList.addItem("Right");
+            scrollableLayout.addComponent(alignList);
 
             layout.addComponent(scrollableLayout);
 
@@ -1200,8 +1223,8 @@ public class ModuleCreatorDialog extends Dialog {
                         selectedTextArea.writeText("padding=" + paddingTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if (!alignTextField.getText().isEmpty()) {
-                        selectedTextArea.writeText("align=" + alignTextField.getText());
+                    if (alignList.getSelectedItem() != null) {
+                        selectedTextArea.writeText("align=" + alignList.getSelectedItem().toLowerCase());
                         selectedTextArea.performReturn();
                     }
 
@@ -1232,7 +1255,7 @@ public class ModuleCreatorDialog extends Dialog {
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + LAYOUT_HEIGHT - 25, Color.gray.getRGB());
             });
 
-            Label imageLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Image Link:", 5, 8);
+            Label imageLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Image Link (Requires Valid URL):", 5, 8);
             scrollableLayout.addComponent(imageLabel);
             TextField imageTextField = new TextField(5, 18, 162);
             scrollableLayout.addComponent(imageTextField);
@@ -1251,9 +1274,13 @@ public class ModuleCreatorDialog extends Dialog {
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if (!imageTextField.getText().isEmpty()) {
-                        buttonPositive.setEnabled(true);
-                    } else {
+                    if(!imageTextField.getText().isEmpty()){
+                        if(IsMatch(imageTextField.getText())) {
+                            buttonPositive.setEnabled(true);
+                        }else {
+                            buttonPositive.setEnabled(false);
+                        }
+                    }else{
                         buttonPositive.setEnabled(false);
                     }
 
