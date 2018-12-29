@@ -1,65 +1,66 @@
 package mastef_chief.gitwebbuilder.app;
 
-import com.mrcrayfish.device.api.app.Application;
-import com.mrcrayfish.device.api.app.Dialog;
-import com.mrcrayfish.device.api.app.Icons;
-import com.mrcrayfish.device.api.app.ScrollableLayout;
-import com.mrcrayfish.device.api.app.component.Button;
-import com.mrcrayfish.device.api.app.component.*;
-import com.mrcrayfish.device.api.app.component.Image;
-import com.mrcrayfish.device.api.app.component.Label;
-import com.mrcrayfish.device.api.app.component.TextArea;
-import com.mrcrayfish.device.api.app.interfaces.IHighlight;
-import com.mrcrayfish.device.api.io.File;
-import com.mrcrayfish.device.api.task.TaskManager;
-import com.mrcrayfish.device.api.utils.OnlineRequest;
-import com.mrcrayfish.device.api.utils.RenderUtil;
-import com.mrcrayfish.device.core.Laptop;
-import com.mrcrayfish.device.core.io.FileSystem;
-import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
-import com.mrcrayfish.device.programs.system.layout.StandardLayout;
-import mastef_chief.gitwebbuilder.app.components.MenuButton;
-import mastef_chief.gitwebbuilder.app.components.ModuleCreatorDialog;
-import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
-import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
-import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.util.Constants;
-import org.lwjgl.input.Keyboard;
-
-import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
+import javax.annotation.Nullable;
+
+import org.lwjgl.input.Keyboard;
+
+import com.mrcrayfish.device.MrCrayfishDeviceMod;
+import com.mrcrayfish.device.api.app.Application;
+import com.mrcrayfish.device.api.app.Dialog;
+import com.mrcrayfish.device.api.app.Icons;
+import com.mrcrayfish.device.api.app.Notification;
+import com.mrcrayfish.device.api.app.ScrollableLayout;
+import com.mrcrayfish.device.api.app.component.Button;
+import com.mrcrayfish.device.api.app.component.CheckBox;
+import com.mrcrayfish.device.api.app.component.ComboBox;
+import com.mrcrayfish.device.api.app.component.ItemList;
+import com.mrcrayfish.device.api.app.component.Label;
+import com.mrcrayfish.device.api.app.component.RadioGroup;
+import com.mrcrayfish.device.api.app.component.TextArea;
+import com.mrcrayfish.device.api.app.interfaces.IHighlight;
+import com.mrcrayfish.device.api.io.File;
+import com.mrcrayfish.device.api.utils.OnlineRequest;
+import com.mrcrayfish.device.api.utils.RenderUtil;
+import com.mrcrayfish.device.core.Laptop;
+import com.mrcrayfish.device.core.io.FileSystem;
+import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
+import com.mrcrayfish.device.programs.system.layout.StandardLayout;
+
+import mastef_chief.gitwebbuilder.Reference;
+import mastef_chief.gitwebbuilder.app.components.MenuButton;
+import mastef_chief.gitwebbuilder.app.components.ModuleCreatorDialog;
+import mastef_chief.gitwebbuilder.app.components.PasteBinCompleteDialog;
+import mastef_chief.gitwebbuilder.app.models.GWBLogoModel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.util.Constants;
+
 public class GWBApp extends Application {
 
-    //Todo module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
+    // Todo module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
 
-    private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder()
-            && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
+    private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder() && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
 
-    public static final IHighlight CODE_HIGHLIGHT = text ->
-    {
+    public static final IHighlight CODE_HIGHLIGHT = text -> {
         if (text.startsWith("#"))
             return asArray(TextFormatting.GREEN);
 
@@ -67,14 +68,13 @@ public class GWBApp extends Application {
             return asArray(TextFormatting.AQUA);
 
         switch (text) {
-            case "text":
-            case "image":
-                return asArray(TextFormatting.BLUE);
-            default:
-                return asArray(TextFormatting.WHITE);
+        case "text":
+        case "image":
+            return asArray(TextFormatting.BLUE);
+        default:
+            return asArray(TextFormatting.WHITE);
         }
     };
-
 
     Minecraft mc = Minecraft.getMinecraft();
 
@@ -86,7 +86,7 @@ public class GWBApp extends Application {
     private float rotationCounter = 0;
     private int tickCounter = 0;
 
-    //Todo work on save method to enable and disable save button
+    // Todo work on save method to enable and disable save button
     private String savedData;
 
     private boolean isSaved;
@@ -113,7 +113,7 @@ public class GWBApp extends Application {
     private Button importButton;
     private Button copyToClipboardButton;
 
-    //Module Buttons
+    // Module Buttons
     private Button paragraphModuleButton;
     private Button navigationModuleButton;
     private Button brewingModuleButton;
@@ -126,10 +126,10 @@ public class GWBApp extends Application {
     private Button headerModuleButton;
     private Button bannerModuleButton;
 
-    //16 Color Buttons
+    // 16 Color Buttons
     private Button[] formattingButtons = new Button[TextFormatting.values().length - 1];
 
-    //Formatting Buttons
+    // Formatting Buttons
     private Button resetButton;
 
     private ComboBox.List<String> textFormattingSelectionList;
@@ -138,7 +138,6 @@ public class GWBApp extends Application {
 
     private Label recentSitesLabel;
     private Label autoSaveLabel;
-
 
     private CheckBox autoSaveOnCheckBox;
     private CheckBox autoSaveOffCheckBox;
@@ -150,17 +149,13 @@ public class GWBApp extends Application {
 
     private GWBLogoModel gwbLogoModel = new GWBLogoModel();
 
-    private static final ResourceLocation logo = new ResourceLocation("gitwebbuilder:textures/app/gui/logo.png");
-    private static final ResourceLocation ud = new ResourceLocation("gitwebbuilder:textures/app/gui/ud.png");
+    private static final ResourceLocation LOGO = new ResourceLocation(Reference.MOD_ID, "textures/app/gui/logo.png");
+    private static final ResourceLocation UD = new ResourceLocation(Reference.MOD_ID, "textures/app/gui/ud.png");
 
     /**
-     * The default initialization method. Clears any components in the default
-     * layout and sets it as the current layout. If you override this method and
-     * are using the default layout, make sure you call it using
-     * <code>super.init(x, y)</code>
+     * The default initialization method. Clears any components in the default layout and sets it as the current layout. If you override this method and are using the default layout, make sure you call it using <code>super.init(x, y)</code>
      * <p>
-     * The parameters passed are the x and y location of the top left corner or
-     * your application window.
+     * The parameters passed are the x and y location of the top left corner or your application window.
      */
     @Override
     public void init(@Nullable NBTTagCompound nbtTagCompound) {
@@ -168,20 +163,16 @@ public class GWBApp extends Application {
         /*--------------------------------------------------------------------------*/
         layoutMain = new StandardLayout("Menu", 363, 165, this, null);
         layoutMain.setIcon(Icons.HOME);
-        layoutMain.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        layoutMain.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
         });
 
-        layoutMain.setInitListener(() ->
-        {
+        layoutMain.setInitListener(() -> {
             sitesList.getItems().clear();
-            FileSystem.getApplicationFolder(this, (folder, success) ->
-            {
+            FileSystem.getApplicationFolder(this, (folder, success) -> {
                 if (success) {
-                    folder.search(file -> file.isForApplication(this)).forEach(file ->
-                    {
+                    folder.search(file -> file.isForApplication(this)).forEach(file -> {
                         sitesList.addItem(Sites.fromFile(file));
                     });
                 } else {
@@ -203,15 +194,15 @@ public class GWBApp extends Application {
         loadSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
-                openDialog.setResponseHandler((success, file) ->
-                {
+                openDialog.setResponseHandler((success, file) -> {
                     if (file.isForApplication(this)) {
                         NBTTagCompound data = file.getData();
                         siteBuilderTextArea.setText(data.getString("content"));
                         currentFile = file;
-                        //Todo Testing Code
-                        /*saveSiteButton.setEnabled(false);
-                        savedData = siteBuilderTextArea.getText();*/
+                        // Todo Testing Code
+                        /*
+                         * saveSiteButton.setEnabled(false); savedData = siteBuilderTextArea.getText();
+                         */
                         this.setCurrentLayout(layoutCodeView);
                         return true;
                     } else {
@@ -229,7 +220,7 @@ public class GWBApp extends Application {
         settingsButton = new MenuButton(210, 125, 75, 16, "Settings", Icons.WRENCH);
         settingsButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                //this.setCurrentLayout(layoutSettings);
+                // this.setCurrentLayout(layoutSettings);
             }
         });
         layoutMain.addComponent(settingsButton);
@@ -268,8 +259,7 @@ public class GWBApp extends Application {
                 super.handleUnload();
             }
         };
-        layoutSettings.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        layoutSettings.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
         });
@@ -299,7 +289,6 @@ public class GWBApp extends Application {
         });
         autoSaveOffCheckBox.setRadioGroup(autoSaveToggle);
         layoutSettings.addComponent(autoSaveOffCheckBox);
-
 
         /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -425,8 +414,7 @@ public class GWBApp extends Application {
                 exportDialog.setTitle("Export Site");
                 exportDialog.setPositiveText("Export");
                 this.openDialog(exportDialog);
-                exportDialog.setResponseHandler((success, v) ->
-                {
+                exportDialog.setResponseHandler((success, v) -> {
                     if (success) {
                         createPastebin(exportDialog.getTextFieldInput().getText(), siteBuilderTextArea.getText().replace("\n\n", "\n").replace("&", "%26"));
                     }
@@ -454,7 +442,6 @@ public class GWBApp extends Application {
                     return false;
                 });
 
-
             }
         });
         layoutCodeView.addComponent(importButton);
@@ -465,7 +452,7 @@ public class GWBApp extends Application {
             if (mouseButton == 0) {
                 StringSelection code = new StringSelection(siteBuilderTextArea.getText().replace("\n\n", "\n"));
                 clipboard.setContents(code, null);
-                TaskManager.sendTask(new TaskNotificationCopiedCode());
+                MrCrayfishDeviceMod.proxy.showNotification(new Notification(Icons.COPY, TextFormatting.BOLD + "Copied", "Code To Clipboard").toTag());
             }
         });
         layoutCodeView.addComponent(copyToClipboardButton);
@@ -502,19 +489,18 @@ public class GWBApp extends Application {
                 try {
                     liveGitWebFrame.loadRaw(renderFormatting(siteBuilderTextArea.getText()));
                 } catch (Throwable e) {
-                    this.openDialog(new Dialog.Message(TextFormatting.RED + "Error \n" + TextFormatting.RESET + e.getLocalizedMessage() + "\nCheck logs for more info." ));
+                    this.openDialog(new Dialog.Message(TextFormatting.RED + "Error \n" + TextFormatting.RESET + e.getLocalizedMessage() + "\nCheck logs for more info."));
                     e.printStackTrace();
                 }
 
                 this.setCurrentLayout(layoutLiveView);
-
 
             }
         });
         layoutCodeView.addComponent(liveViewCheckBox);
 
         siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 75, layoutCodeView.height - 22);
-        //siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
+        // siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
         for (int i = 0; i < formattingButtons.length; i++) {
@@ -532,7 +518,7 @@ public class GWBApp extends Application {
             formattingButtons[i] = button;
         }
 
-        String[] formattingType = new String[]{"Formatting", "Modules"};
+        String[] formattingType = new String[] { "Formatting", "Modules" };
         textFormattingSelectionList = new ComboBox.List<>(290, 23, 70, formattingType);
         textFormattingSelectionList.setChangeListener((oldValue, newValue) -> {
             if (!newValue.equals(oldValue)) {
@@ -565,8 +551,7 @@ public class GWBApp extends Application {
 
         moduleSelctionLayout = new ScrollableLayout(290, 39, 70, 200, 123);
         moduleSelctionLayout.setVisible(false);
-        moduleSelctionLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        moduleSelctionLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y, x + 100, y + 300, Color.gray.getRGB());
         });
@@ -661,16 +646,13 @@ public class GWBApp extends Application {
         });
         moduleSelctionLayout.addComponent(bannerModuleButton);
 
-
-
-        //Todo Add search for code
+        // Todo Add search for code
 
         /*---------------------------------------------------------------------------------------------------------------*/
 
         layoutDesignView = new StandardLayout("Design View", 363, 165, this, null);
         layoutDesignView.setIcon(Icons.EDIT);
-        layoutDesignView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        layoutDesignView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y + 21, x + width, y + 164, Color.darkGray.getRGB());
         });
@@ -679,16 +661,13 @@ public class GWBApp extends Application {
         layoutDesignView.addComponent(designViewCheckBox);
         layoutDesignView.addComponent(liveViewCheckBox);
 
-
-
-        //Todo work on design view
+        // Todo work on design view
 
         /*---------------------------------------------------------------------------------------------------------------*/
 
         layoutLiveView = new StandardLayout("Live View", 363, 165, this, null);
         layoutLiveView.setIcon(Icons.PLAY);
-        layoutLiveView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        layoutLiveView.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y + 21, x + width, y + 164, Color.GRAY.getRGB());
         });
@@ -702,13 +681,10 @@ public class GWBApp extends Application {
         layoutLiveView.addComponent(liveGitWebFrame);
     }
 
-
-
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean active, float partialTicks) {
 
         super.render(laptop, mc, x, y, mouseX, mouseY, active, partialTicks);
-
 
         if (this.getCurrentLayout() == layoutMain) {
             GlStateManager.pushMatrix();
@@ -720,7 +696,7 @@ public class GWBApp extends Application {
                 GlStateManager.rotate(5F, 1, 0, 0);
                 GlStateManager.rotate(200F, 0, 0, 1);
                 GlStateManager.rotate(-rotationCounter - partialTicks, 0, 1, 0);
-                mc.getTextureManager().bindTexture(logo);
+                mc.getTextureManager().bindTexture(LOGO);
                 gwbLogoModel.render((Entity) null, 0F, 0F, 0F, 0F, 0F, 1.0F);
                 RenderHelper.disableStandardItemLighting();
                 GlStateManager.disableDepth();
@@ -731,11 +707,10 @@ public class GWBApp extends Application {
 
         if (this.getCurrentLayout() == layoutDesignView) {
 
-            mc.getTextureManager().bindTexture(ud);
+            mc.getTextureManager().bindTexture(UD);
             RenderUtil.drawRectWithTexture((double) (x + 46), (double) (y + 19), 0.0F, 0.0F, 250, 145, 250, 250);
 
         }
-
 
     }
 
@@ -745,7 +720,6 @@ public class GWBApp extends Application {
 
         rotationCounter++;
         rotationCounter %= 360;
-
 
         if (autoSave) {
             if (this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView)) {
@@ -787,20 +761,15 @@ public class GWBApp extends Application {
 
     }
 
-
     public String renderFormatting(String content) {
 
         return content
-                //new line fix
+                // new line fix
                 .replace("\n\n", "\n")
-                //color conversion to unicode format
-                .replace("&0", "\u00A70").replace("&1", "\u00A71").replace("&2", "\u00A72").replace("&3", "\u00A73")
-                .replace("&4", "\u00A74").replace("&5", "\u00A75").replace("&6", "\u00A76").replace("&7", "\u00A77")
-                .replace("&8", "\u00A78").replace("&9", "\u00A79").replace("&a", "\u00A7a").replace("&b", "\u00A7b")
-                .replace("&c", "\u00A7c").replace("&d", "\u00A7d").replace("&e", "\u00A7e").replace("&f", "\u00A7f")
-                //Formatting conversion to unicode format
-                .replace("&k", "\u00A7k").replace("&l", "\u00A7l").replace("&m", "\u00A7m").replace("&n", "\u00A7n")
-                .replace("&o", "\u00A7o").replace("&r", "\u00A7r");
+                // color conversion to unicode format
+                .replace("&0", "\u00A70").replace("&1", "\u00A71").replace("&2", "\u00A72").replace("&3", "\u00A73").replace("&4", "\u00A74").replace("&5", "\u00A75").replace("&6", "\u00A76").replace("&7", "\u00A77").replace("&8", "\u00A78").replace("&9", "\u00A79").replace("&a", "\u00A7a").replace("&b", "\u00A7b").replace("&c", "\u00A7c").replace("&d", "\u00A7d").replace("&e", "\u00A7e").replace("&f", "\u00A7f")
+                // Formatting conversion to unicode format
+                .replace("&k", "\u00A7k").replace("&l", "\u00A7l").replace("&m", "\u00A7m").replace("&n", "\u00A7n").replace("&o", "\u00A7o").replace("&r", "\u00A7r");
 
     }
 
@@ -847,10 +816,9 @@ public class GWBApp extends Application {
             }
         }
 
-        /*if (code == Keyboard.KEY_DELETE) {
-            siteBuilderTextArea.moveCursorRight(1);
-            siteBuilderTextArea.performBackspace();
-        }*/
+        /*
+         * if (code == Keyboard.KEY_DELETE) { siteBuilderTextArea.moveCursorRight(1); siteBuilderTextArea.performBackspace(); }
+         */
 
         if (this.getCurrentLayout().equals(layoutCodeView) || this.getCurrentLayout().equals(layoutDesignView) || this.getCurrentLayout().equals(layoutLiveView)) {
             if (GuiScreen.isCtrlKeyDown()) {
@@ -897,7 +865,6 @@ public class GWBApp extends Application {
             }
         }
 
-
     }
 
     @Override
@@ -919,19 +886,13 @@ public class GWBApp extends Application {
     public void onClose() {
         super.onClose();
 
-
-        //Todo add save on close if not saved already
-
+        // Todo add save on close if not saved already
 
         currentFile = null;
 
-
     }
 
-
-    private void getWebsite(String website)
-    {
-
+    private void getWebsite(String website) {
 
         Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
 
@@ -940,27 +901,20 @@ public class GWBApp extends Application {
         String directory = matcher.group("directory");
         String url;
 
-        if(directory == null)
-        {
+        if (directory == null) {
             url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + "/index";
-        }
-        else
-        {
-            if(directory.endsWith("/"))
-            {
+        } else {
+            if (directory.endsWith("/")) {
                 directory = directory.substring(0, directory.length() - 1);
             }
             url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + directory + "/index";
         }
 
-
         this.getCode(url);
     }
 
-    private void getCode(String url)
-    {
-        OnlineRequest.getInstance().make(url, (success, response) ->
-        {
+    private void getCode(String url) {
+        OnlineRequest.getInstance().make(url, (success, response) -> {
             System.out.println(response);
         });
     }
@@ -969,7 +923,6 @@ public class GWBApp extends Application {
         return t;
     }
 
-
     @Override
     public void load(NBTTagCompound tagCompound) {
 
@@ -977,7 +930,7 @@ public class GWBApp extends Application {
             autoSave = tagCompound.getBoolean("autoSave");
         }
 
-        //Todo fix issue with autosave in settings
+        // Todo fix issue with autosave in settings
         if (autoSave) {
             autoSaveOnCheckBox.setSelected(true);
         } else {
@@ -987,11 +940,10 @@ public class GWBApp extends Application {
     }
 
     /**
-     * Allows you to save data from your application. This is only called if
-     * {@link #isDirty()} returns true. You can mark your application as dirty
-     * by calling {@link #markDirty()}.
+     * Allows you to save data from your application. This is only called if {@link #isDirty()} returns true. You can mark your application as dirty by calling {@link #markDirty()}.
      *
-     * @param tagCompound the tag compound to save your data to
+     * @param tagCompound
+     *            the tag compound to save your data to
      */
     @Override
     public void save(NBTTagCompound tagCompound) {
