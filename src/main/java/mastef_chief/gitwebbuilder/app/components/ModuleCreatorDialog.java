@@ -1,34 +1,44 @@
 package mastef_chief.gitwebbuilder.app.components;
 
-import com.mrcrayfish.device.api.app.*;
+import java.awt.Color;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
+import org.lwjgl.input.Keyboard;
+
+import com.mrcrayfish.device.Reference;
+import com.mrcrayfish.device.api.app.Alphabet;
+import com.mrcrayfish.device.api.app.Application;
 import com.mrcrayfish.device.api.app.Component;
 import com.mrcrayfish.device.api.app.Dialog;
+import com.mrcrayfish.device.api.app.IIcon;
+import com.mrcrayfish.device.api.app.Icons;
+import com.mrcrayfish.device.api.app.Layout;
+import com.mrcrayfish.device.api.app.ScrollableLayout;
 import com.mrcrayfish.device.api.app.component.Button;
+import com.mrcrayfish.device.api.app.component.Image;
+import com.mrcrayfish.device.api.app.component.ItemList;
 import com.mrcrayfish.device.api.app.component.Label;
-import com.mrcrayfish.device.api.app.component.*;
+import com.mrcrayfish.device.api.app.component.Slider;
+import com.mrcrayfish.device.api.app.component.Text;
 import com.mrcrayfish.device.api.app.component.TextArea;
 import com.mrcrayfish.device.api.app.component.TextField;
 import com.mrcrayfish.device.api.app.listener.SlideListener;
-import com.mrcrayfish.device.api.utils.OnlineRequest;
-import com.mrcrayfish.device.api.utils.RenderUtil;
 import com.mrcrayfish.device.core.Laptop;
 import com.mrcrayfish.device.object.ColorGrid;
 import com.mrcrayfish.device.programs.ApplicationIcons;
 import com.mrcrayfish.device.programs.gitweb.component.GitWebFrame;
-import com.mrcrayfish.device.programs.system.layout.StandardLayout;
-import mastef_chief.gitwebbuilder.app.GWBApp;
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextFormatting;
-import org.lwjgl.Sys;
-import org.lwjgl.input.Keyboard;
 
-import javax.annotation.Nullable;
-import java.awt.*;
-import java.lang.System;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import mastef_chief.gitwebbuilder.app.EnumModuleType;
+import mastef_chief.gitwebbuilder.app.components.ComponentInventory.InventorySlot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 
 public class ModuleCreatorDialog extends Dialog {
 
@@ -36,8 +46,7 @@ public class ModuleCreatorDialog extends Dialog {
 
     private Application application;
 
-    private String selectedModule = null;
-    private String inputText = "";
+    private EnumModuleType selectedModule = null;
     private String positiveText = "Create";
     private String negativeText = "Cancel";
 
@@ -61,33 +70,30 @@ public class ModuleCreatorDialog extends Dialog {
     public static final int LAYOUT_WIDTH = 175;
     public static final int LAYOUT_HEIGHT = 150;
 
-    public ModuleCreatorDialog(String module, TextArea textArea, Application application) {
+    public ModuleCreatorDialog(EnumModuleType module, TextArea textArea, Application application) {
 
         this.selectedModule = module;
         this.selectedTextArea = textArea;
         this.application = application;
     }
 
-
     @Override
     public void init(@Nullable NBTTagCompound nbtTagCompound) {
         super.init(nbtTagCompound);
 
         Layout layout = new Layout(LAYOUT_WIDTH, LAYOUT_HEIGHT);
-        layout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-        {
+        layout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
             Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
             gui.drawRect(x, y, x + LAYOUT_WIDTH, y + LAYOUT_HEIGHT, Color.DARK_GRAY.getRGB());
         });
 
         this.setTitle("Module Builder (" + selectedModule + ")");
 
-
-        if (selectedModule == "Paragraph") {
+        switch (this.selectedModule) {
+        case PARAGRAPH: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 125, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + LAYOUT_HEIGHT - 25, Color.gray.getRGB());
             });
@@ -109,7 +115,6 @@ public class ModuleCreatorDialog extends Dialog {
             };
             scrollableLayout.addComponent(paddingTextField);
 
-
             Label imageLabel = new Label("Image Link (Requires Valid URL):", 5, 90);
             scrollableLayout.addComponent(imageLabel);
             TextField imageTextField = new TextField(5, 102, 162);
@@ -124,13 +129,13 @@ public class ModuleCreatorDialog extends Dialog {
                     super.handleKeyTyped(character, code);
 
                     if (!textTextField.getText().isEmpty()) {
-                        if(!imageTextField.getText().isEmpty()){
-                            if(IsMatch(imageTextField.getText())) {
+                        if (!imageTextField.getText().isEmpty()) {
+                            if (IsMatch(imageTextField.getText())) {
                                 buttonPositive.setEnabled(true);
-                            }else {
+                            } else {
                                 buttonPositive.setEnabled(false);
                             }
-                        }else{
+                        } else {
                             buttonPositive.setEnabled(true);
                         }
 
@@ -142,8 +147,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
                 if (mouseButton == 0) {
 
                     selectedTextArea.performReturn();
@@ -155,8 +159,8 @@ public class ModuleCreatorDialog extends Dialog {
                         selectedTextArea.writeText("padding=" + paddingTextField.getText());
                     }
                     if (!imageTextField.getText().isEmpty()) {
-                            selectedTextArea.performReturn();
-                            selectedTextArea.writeText("image=" + imageTextField.getText());
+                        selectedTextArea.performReturn();
+                        selectedTextArea.writeText("image=" + imageTextField.getText());
 
                     }
                     selectedTextArea.performReturn();
@@ -174,15 +178,12 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
         }
-
-        if (selectedModule == "Navigation") {
-
+        case NAVIGATION: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 1080, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 1080, Color.gray.getRGB());
             });
@@ -251,15 +252,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon1List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon1Button.setIcon(menuItemIcon1List.getSelectedItem());
-                    if(!menuItemLink1TextField.getText().isEmpty()){
+                    if (!menuItemLink1TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon1List);
-
 
             Label menuItemLink2Label = new Label("Menu Item Link (2):", 5, 170);
             scrollableLayout.addComponent(menuItemLink2Label);
@@ -280,15 +280,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon2List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon2Button.setIcon(menuItemIcon2List.getSelectedItem());
-                    if(!menuItemLink2TextField.getText().isEmpty()){
+                    if (!menuItemLink2TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon2List);
-
 
             Label menuItemLink3Label = new Label("Menu Item Link (3):", 5, 270);
             scrollableLayout.addComponent(menuItemLink3Label);
@@ -309,15 +308,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon3List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon3Button.setIcon(menuItemIcon3List.getSelectedItem());
-                    if(!menuItemLink3TextField.getText().isEmpty()){
+                    if (!menuItemLink3TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon3List);
-
 
             Label menuItemLink4Label = new Label("Menu Item Link (4):", 5, 370);
             scrollableLayout.addComponent(menuItemLink4Label);
@@ -338,15 +336,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon4List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon4Button.setIcon(menuItemIcon4List.getSelectedItem());
-                    if(!menuItemLink4TextField.getText().isEmpty()){
+                    if (!menuItemLink4TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon4List);
-
 
             Label menuItemLink5Label = new Label("Menu Item Link (5):", 5, 470);
             scrollableLayout.addComponent(menuItemLink5Label);
@@ -367,15 +364,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon5List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon5Button.setIcon(menuItemIcon5List.getSelectedItem());
-                    if(!menuItemLink5TextField.getText().isEmpty()){
+                    if (!menuItemLink5TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon5List);
-
 
             Label menuItemLink6Label = new Label("Menu Item Link (6):", 5, 570);
             scrollableLayout.addComponent(menuItemLink6Label);
@@ -396,15 +392,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon6List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon6Button.setIcon(menuItemIcon6List.getSelectedItem());
-                    if(!menuItemLink6TextField.getText().isEmpty()){
+                    if (!menuItemLink6TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon6List);
-
 
             Label menuItemLink7Label = new Label("Menu Item Link (7):", 5, 670);
             scrollableLayout.addComponent(menuItemLink7Label);
@@ -425,15 +420,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon7List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon7Button.setIcon(menuItemIcon7List.getSelectedItem());
-                    if(!menuItemLink7TextField.getText().isEmpty()){
+                    if (!menuItemLink7TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon7List);
-
 
             Label menuItemLink8Label = new Label("Menu Item Link (8):", 5, 770);
             scrollableLayout.addComponent(menuItemLink8Label);
@@ -454,15 +448,14 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon8List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon8Button.setIcon(menuItemIcon8List.getSelectedItem());
-                    if(!menuItemLink8TextField.getText().isEmpty()){
+                    if (!menuItemLink8TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
             });
             scrollableLayout.addComponent(menuItemIcon8List);
-
 
             Label menuItemLink9Label = new Label("Menu Item Link (9):", 5, 870);
             scrollableLayout.addComponent(menuItemLink9Label);
@@ -483,9 +476,9 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon9List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon9Button.setIcon(menuItemIcon9List.getSelectedItem());
-                    if(!menuItemLink9TextField.getText().isEmpty()){
+                    if (!menuItemLink9TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
@@ -511,9 +504,9 @@ public class ModuleCreatorDialog extends Dialog {
             menuItemIcon10List.setItemClickListener((e, index, mouseButton) -> {
                 if (mouseButton == 0) {
                     menuItemIcon10Button.setIcon(menuItemIcon10List.getSelectedItem());
-                    if(!menuItemLink10TextField.getText().isEmpty()){
+                    if (!menuItemLink10TextField.getText().isEmpty()) {
                         buttonPositive.setEnabled(true);
-                    }else {
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
                 }
@@ -538,8 +531,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
                 if (mouseButton == 0) {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("#navigation");
@@ -690,18 +682,25 @@ public class ModuleCreatorDialog extends Dialog {
             buttonNegative.setSize(negativeWidth + 10, 16);
             buttonNegative.setClickListener((mouseX, mouseY, mouseButton) -> close());
             layout.addComponent(buttonNegative);
-
+            break;
         }
-
-        if (selectedModule == "Brewing") {
-
-            /*ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 220, LAYOUT_HEIGHT - 25);
+        case BREWING: {
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 169, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 220, Color.gray.getRGB());
             });
+
+            int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
+            int inventoryY = 80;
+            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 136, 128, 73, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), new InventorySlot(inventoryX + 14, inventoryY + 8), new InventorySlot(inventoryX + 75, inventoryY + 8), new InventorySlot(inventoryX + 52, inventoryY + 42), new InventorySlot(inventoryX + 75, inventoryY + 49), new InventorySlot(inventoryX + 98, inventoryY + 42));
+            inventory.setStackInSlot(0, new ItemStack(Items.BLAZE_POWDER));
+            inventory.setStackInSlot(1, new ItemStack(Items.NETHER_STAR));
+            inventory.setStackInSlot(2, new ItemStack(Items.GLASS_BOTTLE));
+            inventory.setStackInSlot(3, new ItemStack(Items.GLASS_BOTTLE));
+            inventory.setStackInSlot(4, new ItemStack(Items.GLASS_BOTTLE));
+            scrollableLayout.addComponent(inventory);
 
             Label titleLabel = new Label("Title:", 5, 8);
             scrollableLayout.addComponent(titleLabel);
@@ -713,73 +712,38 @@ public class ModuleCreatorDialog extends Dialog {
             TextField descTextField = new TextField(5, 48, 162);
             scrollableLayout.addComponent(descTextField);
 
-            Label fuelLabel = new Label("Fuel:", 5, 68);
-            scrollableLayout.addComponent(fuelLabel);
-            TextField fuelTextField = new TextField(5, 78, 162);
-            fuelTextField.setPlaceholder("{id:\"minecraft:blaze_powder\",Count:1}");
-            scrollableLayout.addComponent(fuelTextField);
-
-            Label inputLabel = new Label("Input:", 5, 98);
-            scrollableLayout.addComponent(inputLabel);
-            TextField inputTextField = new TextField(5, 108, 162);
-            scrollableLayout.addComponent(inputTextField);
-
-            Label output1Label = new Label("Output (1):", 5, 128);
-            scrollableLayout.addComponent(output1Label);
-            TextField output1TextField = new TextField(5, 138, 162);
-            scrollableLayout.addComponent(output1TextField);
-
-            Label output2Label = new Label("Output (2):", 5, 158);
-            scrollableLayout.addComponent(output2Label);
-            TextField output2TextField = new TextField(5, 168, 162);
-            scrollableLayout.addComponent(output2TextField);
-
-            Label output3Label = new Label("Output (3):", 5, 188);
-            scrollableLayout.addComponent(output3Label);
-            TextField output3TextField = new TextField(5, 198, 162);
-            scrollableLayout.addComponent(output3TextField);
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
             buttonPositive = new Button(125, 130, positiveText);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
-
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
                 if (mouseButton == 0) {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("#brewing");
                     selectedTextArea.performReturn();
-                    if(!titleTextField.getText().isEmpty()){
+                    if (!titleTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("title=" + titleTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if(!descTextField.getText().isEmpty()){
+                    if (!descTextField.getText().isEmpty()) {
                         selectedTextArea.writeText("desc=" + descTextField.getText());
                         selectedTextArea.performReturn();
                     }
-                    if(!fuelTextField.getText().isEmpty()){
-                        selectedTextArea.writeText("slot-fuel=" + fuelTextField.getText());
+                    if (!inventory.getStackInSlot(0).isEmpty()) {
+                        selectedTextArea.writeText("slot-fuel=" + inventory.getStackInSlot(0).serializeNBT());
                         selectedTextArea.performReturn();
                     }
-                    if(!inputTextField.getText().isEmpty()){
-                        selectedTextArea.writeText("slot-input=" + inputTextField.getText());
+                    if (!inventory.getStackInSlot(1).isEmpty()) {
+                        selectedTextArea.writeText("slot-input=" + inventory.getStackInSlot(1).serializeNBT());
                         selectedTextArea.performReturn();
                     }
-                    if(!output1TextField.getText().isEmpty()){
-                        selectedTextArea.writeText("slot-output-1=" + output1TextField.getText());
-                        selectedTextArea.performReturn();
+                    for (int i = 0; i < 3; i++) {
+                        if (!inventory.getStackInSlot(2 + i).isEmpty()) {
+                            selectedTextArea.writeText("slot-output-" + (i + 1) + "=" + inventory.getStackInSlot(2 + i).serializeNBT());
+                            selectedTextArea.performReturn();
+                        }
                     }
-                    if(!output2TextField.getText().isEmpty()){
-                        selectedTextArea.writeText("slot-output-2=" + output2TextField.getText());
-                        selectedTextArea.performReturn();
-                    }
-                    if(!output3TextField.getText().isEmpty()){
-                        selectedTextArea.writeText("slot-output-3=" + output3TextField.getText());
-                        selectedTextArea.performReturn();
-                    }
-
 
                     close();
                 }
@@ -790,18 +754,13 @@ public class ModuleCreatorDialog extends Dialog {
             buttonNegative = new Button(75, 130, negativeText);
             buttonNegative.setSize(negativeWidth + 10, 16);
             buttonNegative.setClickListener((mouseX, mouseY, mouseButton) -> close());
-            layout.addComponent(buttonNegative);*/
-
-
+            layout.addComponent(buttonNegative);
+            break;
         }
-
-        if (selectedModule == "Download") {
-
-
+        case DOWNLOAD: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 130, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 130, Color.gray.getRGB());
             });
@@ -826,13 +785,10 @@ public class ModuleCreatorDialog extends Dialog {
             TextField textTextField = new TextField(5, 108, 162);
             scrollableLayout.addComponent(textTextField);
 
-
             layout.addComponent(scrollableLayout);
 
-
             Dialog.OpenFile openFile = new Dialog.OpenFile(application);
-            openFile.setResponseHandler((success, file) ->
-            {
+            openFile.setResponseHandler((success, file) -> {
 
                 if (success) {
                     fileAppTextField.writeText(file.getOpeningApp());
@@ -865,8 +821,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
 
                 if (mouseButton == 0) {
 
@@ -899,16 +854,16 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
         }
-
-
-        if (selectedModule == "Footer") {
-
+        case FURNACE: {
+            // TODO add furnace
+            break;
+        }
+        case FOOTER: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 160, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 160, Color.gray.getRGB());
             });
@@ -973,7 +928,6 @@ public class ModuleCreatorDialog extends Dialog {
             };
             scrollableLayout.addComponent(colorDisplay);
 
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
@@ -992,8 +946,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
 
                 if (mouseButton == 0) {
 
@@ -1023,22 +976,19 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
         }
-
-        if (selectedModule == "Divider") {
-
+        case DIVIDER: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 120, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 120, Color.gray.getRGB());
             });
 
             Label sizeLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + "Size:", 5, 8);
             scrollableLayout.addComponent(sizeLabel);
-            TextField sizeTextField = new TextField(5, 18, 162){
+            TextField sizeTextField = new TextField(5, 18, 162) {
                 @Override
                 public void handleKeyTyped(char character, int code) {
                     if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
@@ -1093,7 +1043,6 @@ public class ModuleCreatorDialog extends Dialog {
             };
             scrollableLayout.addComponent(colorDisplay);
 
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
@@ -1112,8 +1061,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
 
                 if (mouseButton == 0) {
 
@@ -1140,15 +1088,20 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
         }
-
-        if (selectedModule == "Header") {
-
+        case CRAFTING: {
+            // TODO add crafting
+            break;
+        }
+        case ANVIL: {
+            // TODO add anvil
+            break;
+        }
+        case HEADER: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 150, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 150, Color.gray.getRGB());
             });
@@ -1160,7 +1113,7 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label scaleLabel = new Label("Scale:", 5, 38);
             scrollableLayout.addComponent(scaleLabel);
-            TextField scaleTextField = new TextField(5, 48, 162){
+            TextField scaleTextField = new TextField(5, 48, 162) {
                 @Override
                 public void handleKeyTyped(char character, int code) {
                     if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
@@ -1172,7 +1125,7 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label paddingLabel = new Label("Padding:", 5, 68);
             scrollableLayout.addComponent(paddingLabel);
-            TextField paddingTextField = new TextField(5, 78, 162){
+            TextField paddingTextField = new TextField(5, 78, 162) {
                 @Override
                 public void handleKeyTyped(char character, int code) {
                     if (Character.isDigit(character) || code == Keyboard.KEY_BACK) {
@@ -1207,8 +1160,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
                 if (mouseButton == 0) {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("#header");
@@ -1242,15 +1194,12 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
         }
-
-        if (selectedModule == "Banner") {
-
+        case BANNER: {
             ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 125, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
-            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) ->
-            {
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + LAYOUT_HEIGHT - 25, Color.gray.getRGB());
             });
@@ -1265,7 +1214,6 @@ public class ModuleCreatorDialog extends Dialog {
             TextField textTextField = new TextField(5, 48, 162);
             scrollableLayout.addComponent(textTextField);
 
-
             layout.addComponent(scrollableLayout);
 
             int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
@@ -1274,13 +1222,13 @@ public class ModuleCreatorDialog extends Dialog {
                 protected void handleKeyTyped(char character, int code) {
                     super.handleKeyTyped(character, code);
 
-                    if(!imageTextField.getText().isEmpty()){
-                        if(IsMatch(imageTextField.getText())) {
+                    if (!imageTextField.getText().isEmpty()) {
+                        if (IsMatch(imageTextField.getText())) {
                             buttonPositive.setEnabled(true);
-                        }else {
+                        } else {
                             buttonPositive.setEnabled(false);
                         }
-                    }else{
+                    } else {
                         buttonPositive.setEnabled(false);
                     }
 
@@ -1288,8 +1236,7 @@ public class ModuleCreatorDialog extends Dialog {
             };
             buttonPositive.setEnabled(false);
             buttonPositive.setSize(positiveWidth + 10, 16);
-            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) ->
-            {
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
                 if (mouseButton == 0) {
                     selectedTextArea.performReturn();
                     selectedTextArea.writeText("#banner");
@@ -1314,25 +1261,28 @@ public class ModuleCreatorDialog extends Dialog {
 
             Label requiredLabel = new Label(TextFormatting.RED + "*" + TextFormatting.RESET + " Required", 7, 134);
             layout.addComponent(requiredLabel);
-
+            break;
+        }
+        default: {
+            this.close();
+            break;
+        }
         }
 
         this.setLayout(layout);
-
-
     }
 
-    private void getIcons(ItemList itemList){
+    private void getIcons(ItemList itemList) {
         ApplicationIcons.IconSet iconSet = new ApplicationIcons.IconSet("Standard Icons", Icons.values());
-        for(int i = 0; i < 126 && i < iconSet.getIcons().length; ++i) {
+        for (int i = 0; i < 126 && i < iconSet.getIcons().length; ++i) {
             Enum<? extends IIcon> anEnum = iconSet.getIcons()[i];
-            IIcon icon = (IIcon)anEnum;
+            IIcon icon = (IIcon) anEnum;
             itemList.addItem(icon);
         }
         ApplicationIcons.IconSet alphabetSet = new ApplicationIcons.IconSet("Alphabet", Alphabet.values());
-        for(int i = 0; i < 126 && i < alphabetSet.getIcons().length; ++i) {
+        for (int i = 0; i < 126 && i < alphabetSet.getIcons().length; ++i) {
             Enum<? extends IIcon> anEnum = alphabetSet.getIcons()[i];
-            IIcon icon = (IIcon)anEnum;
+            IIcon icon = (IIcon) anEnum;
             itemList.addItem(icon);
         }
     }
@@ -1359,16 +1309,15 @@ public class ModuleCreatorDialog extends Dialog {
         }
     }
 
+    public boolean isGitwebSite(String website) {
 
-    public boolean isGitwebSite(String website){
+        Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
 
-            Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
-
-            if(!matcher.matches()){
-                return false;
-            }else {
-                return true;
-            }
+        if (!matcher.matches()) {
+            return false;
+        } else {
+            return true;
+        }
 
     }
 

@@ -56,7 +56,7 @@ import net.minecraftforge.common.util.Constants;
 
 public class GWBApp extends Application {
 
-    // Todo module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
+    // TODO module dialog, scrollable layout for design view, custom layouts which take in module instance, which type of module
 
     private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder() && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
 
@@ -86,7 +86,7 @@ public class GWBApp extends Application {
     private float rotationCounter = 0;
     private int tickCounter = 0;
 
-    // Todo work on save method to enable and disable save button
+    // TODO work on save method to enable and disable save button
     private String savedData;
 
     private boolean isSaved;
@@ -194,20 +194,18 @@ public class GWBApp extends Application {
         loadSiteButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 Dialog.OpenFile openDialog = new Dialog.OpenFile(this);
+                openDialog.setFilter(this);
                 openDialog.setResponseHandler((success, file) -> {
                     if (file.isForApplication(this)) {
                         NBTTagCompound data = file.getData();
                         siteBuilderTextArea.setText(data.getString("content"));
                         currentFile = file;
-                        // Todo Testing Code
+                        // TODO Testing Code
                         /*
                          * saveSiteButton.setEnabled(false); savedData = siteBuilderTextArea.getText();
                          */
                         this.setCurrentLayout(layoutCodeView);
                         return true;
-                    } else {
-                        Dialog.Message errorDialog = new Dialog.Message("Invalid file for GitWeb Builder");
-                        openDialog(errorDialog);
                     }
                     return false;
                 });
@@ -560,7 +558,7 @@ public class GWBApp extends Application {
         paragraphModuleButton = new Button(1, 1, 62, 16, "Paragraph");
         paragraphModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Paragraph", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.PARAGRAPH, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -569,18 +567,16 @@ public class GWBApp extends Application {
         navigationModuleButton = new Button(1, 19, 62, 16, "Navigation");
         navigationModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Navigation", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.NAVIGATION, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
         moduleSelctionLayout.addComponent(navigationModuleButton);
 
         brewingModuleButton = new Button(1, 37, 62, 16, "Brewing");
-        brewingModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
-        brewingModuleButton.setEnabled(false);
         brewingModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Brewing", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.BREWING, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -589,7 +585,7 @@ public class GWBApp extends Application {
         downloadModuleButton = new Button(1, 55, 62, 16, "Download");
         downloadModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Download", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.DOWNLOAD, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -598,12 +594,18 @@ public class GWBApp extends Application {
         furnaceModuleButton = new Button(1, 73, 62, 16, "Furnace");
         furnaceModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
         furnaceModuleButton.setEnabled(false);
+        furnaceModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.FURNACE, siteBuilderTextArea, this);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
         moduleSelctionLayout.addComponent(furnaceModuleButton);
 
         footerModuleButton = new Button(1, 91, 62, 16, "Footer");
         footerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Footer", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.FOOTER, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -612,7 +614,7 @@ public class GWBApp extends Application {
         dividerModuleButton = new Button(1, 109, 62, 16, "Divider");
         dividerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Divider", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.DIVIDER, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -621,17 +623,29 @@ public class GWBApp extends Application {
         craftingModuleButton = new Button(1, 127, 62, 16, "Crafting");
         craftingModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
         craftingModuleButton.setEnabled(false);
+        craftingModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.CRAFTING, siteBuilderTextArea, this);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
         moduleSelctionLayout.addComponent(craftingModuleButton);
 
         anvilModuleButton = new Button(1, 145, 62, 16, "Anvil");
         anvilModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
         anvilModuleButton.setEnabled(false);
+        anvilModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
+            if (mouseButton == 0) {
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.ANVIL, siteBuilderTextArea, this);
+                this.openDialog(moduleCreatorDialog);
+            }
+        });
         moduleSelctionLayout.addComponent(anvilModuleButton);
 
         headerModuleButton = new Button(1, 163, 62, 16, "Header");
         headerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Header", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.HEADER, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
@@ -640,13 +654,13 @@ public class GWBApp extends Application {
         bannerModuleButton = new Button(1, 181, 62, 16, "Banner");
         bannerModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
-                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog("Banner", siteBuilderTextArea, this);
+                ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.BANNER, siteBuilderTextArea, this);
                 this.openDialog(moduleCreatorDialog);
             }
         });
         moduleSelctionLayout.addComponent(bannerModuleButton);
 
-        // Todo Add search for code
+        // TODO Add search for code
 
         /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -661,7 +675,7 @@ public class GWBApp extends Application {
         layoutDesignView.addComponent(designViewCheckBox);
         layoutDesignView.addComponent(liveViewCheckBox);
 
-        // Todo work on design view
+        // TODO work on design view
 
         /*---------------------------------------------------------------------------------------------------------------*/
 
@@ -879,17 +893,15 @@ public class GWBApp extends Application {
         this.setCurrentLayout(layoutCodeView);
 
         return true;
-
     }
 
     @Override
     public void onClose() {
         super.onClose();
 
-        // Todo add save on close if not saved already
+        // TODO add save on close if not saved already
 
         currentFile = null;
-
     }
 
     private void getWebsite(String website) {
@@ -925,31 +937,12 @@ public class GWBApp extends Application {
 
     @Override
     public void load(NBTTagCompound tagCompound) {
-
-        if (tagCompound.hasKey("autoSave", Constants.NBT.TAG_BYTE)) {
-            autoSave = tagCompound.getBoolean("autoSave");
-        }
-
-        // Todo fix issue with autosave in settings
-        if (autoSave) {
-            autoSaveOnCheckBox.setSelected(true);
-        } else {
-            autoSaveOffCheckBox.setSelected(true);
-        }
-
+        autoSave = tagCompound.getBoolean("autoSave");
     }
 
-    /**
-     * Allows you to save data from your application. This is only called if {@link #isDirty()} returns true. You can mark your application as dirty by calling {@link #markDirty()}.
-     *
-     * @param tagCompound
-     *            the tag compound to save your data to
-     */
     @Override
     public void save(NBTTagCompound tagCompound) {
-
         tagCompound.setBoolean("autoSave", autoSave);
-
     }
 
     private static class Sites {
