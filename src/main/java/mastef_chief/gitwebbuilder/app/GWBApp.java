@@ -60,20 +60,39 @@ public class GWBApp extends Application {
 
     private static final Predicate<File> PREDICATE_FILE_SITE = file -> !file.isFolder() && file.getData().hasKey("content", Constants.NBT.TAG_STRING);
 
+    private static TextFormatting[] carriedFormatting = new TextFormatting[0];
     public static final IHighlight CODE_HIGHLIGHT = text -> {
-        if (text.startsWith("#"))
-            return asArray(TextFormatting.GREEN);
-
-        if (text.startsWith("\"") && text.endsWith("\""))
-            return asArray(TextFormatting.AQUA);
-
-        switch (text) {
-        case "text":
-        case "image":
-            return asArray(TextFormatting.BLUE);
-        default:
-            return asArray(TextFormatting.WHITE);
+        if (text.equals("\n")) {
+            carriedFormatting = new TextFormatting[0];
         }
+
+        if (text.startsWith("#")) {
+            carriedFormatting = asArray(TextFormatting.GREEN);
+        }
+
+        if (text.equals("{")) {
+            carriedFormatting = asArray(TextFormatting.AQUA);
+            return asArray(TextFormatting.GOLD);
+        }
+
+        if (text.equals(",")) {
+            return asArray(TextFormatting.GOLD);
+        }
+
+        if (text.equals("}")) {
+            carriedFormatting = new TextFormatting[0];
+            return asArray(TextFormatting.GOLD);
+        }
+
+        if (text.startsWith("http")) {
+            carriedFormatting = asArray(TextFormatting.ITALIC, TextFormatting.AQUA, TextFormatting.UNDERLINE);
+        }
+
+        if (text.equals("=")) {
+            return asArray(TextFormatting.GOLD);
+        }
+
+        return carriedFormatting;
     };
 
     Minecraft mc = Minecraft.getMinecraft();
@@ -433,9 +452,7 @@ public class GWBApp extends Application {
                 this.openDialog(importDialog);
                 importDialog.setResponseHandler((success, s) -> {
                     if (success) {
-
-                        getWebsite(importDialog.getTextFieldInput().getText());
-
+                        return getWebsite(importDialog.getTextFieldInput().getText());
                     }
                     return false;
                 });
@@ -498,7 +515,7 @@ public class GWBApp extends Application {
         layoutCodeView.addComponent(liveViewCheckBox);
 
         siteBuilderTextArea = new TextArea(0, 21, layoutCodeView.width - 75, layoutCodeView.height - 22);
-        // siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
+        siteBuilderTextArea.setHighlight(CODE_HIGHLIGHT);
         layoutCodeView.addComponent(siteBuilderTextArea);
 
         for (int i = 0; i < formattingButtons.length; i++) {
@@ -904,35 +921,56 @@ public class GWBApp extends Application {
         currentFile = null;
     }
 
-    private void getWebsite(String website) {
+    private boolean getWebsite(String website) {
 
         Matcher matcher = GitWebFrame.PATTERN_LINK.matcher(website);
 
-        String domain = matcher.group("domain");
-        String extension = matcher.group("extension");
-        String directory = matcher.group("directory");
-        String url;
+        if (matcher.matches()) {
+            String domain = matcher.group("domain");
+            String extension = matcher.group("extension");
+            String directory = matcher.group("directory");
+            String url;
 
-        if (directory == null) {
-            url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + "/index";
-        } else {
-            if (directory.endsWith("/")) {
-                directory = directory.substring(0, directory.length() - 1);
+            if (directory == null) {
+                url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + "/index";
+            } else {
+                if (directory.endsWith("/")) {
+                    directory = directory.substring(0, directory.length() - 1);
+                }
+                url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + directory + "/index";
             }
-            url = "https://raw.githubusercontent.com/MrCrayfish/GitWeb-Sites/master/" + extension + "/" + domain + directory + "/index";
-        }
 
-        this.getCode(url);
+            this.getCode(url);
+            return true;
+        }
+        return false;
     }
 
     private void getCode(String url) {
         OnlineRequest.getInstance().make(url, (success, response) -> {
-            System.out.println(response);
+            if (success) {
+                siteBuilderTextArea.setText(response.replace("\n\n", "\n").replace("&nl", "\n"));
+            }
         });
     }
 
     private static <T extends Object> T[] asArray(T... t) {
         return t;
+    }
+
+    private static TextFormatting[] getFormatting(TextFormatting... formatting) {
+        TextFormatting[] array = new TextFormatting[carriedFormatting.length + formatting.length];
+        try {
+            for (int i = 0; i < array.length; i++) {
+                if (i < carriedFormatting.length)
+                    array[i] = carriedFormatting[i];
+                else
+                    array[i] = formatting[i - carriedFormatting.length];
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return array;
     }
 
     @Override
