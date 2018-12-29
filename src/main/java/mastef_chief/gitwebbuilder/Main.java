@@ -2,6 +2,7 @@ package mastef_chief.gitwebbuilder;
 
 import com.mrcrayfish.device.api.ApplicationManager;
 import com.mrcrayfish.device.api.task.TaskManager;
+
 import mastef_chief.gitwebbuilder.app.GWBApp;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedCode;
 import mastef_chief.gitwebbuilder.app.tasks.TaskNotificationCopiedLink;
@@ -23,18 +24,18 @@ public class Main {
     public static CommonProxy proxy;
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event){
+    public void preInit(FMLPreInitializationEvent event) {
 
     }
 
     @Mod.EventHandler
-    public void Init(FMLInitializationEvent event){
+    public void init(FMLInitializationEvent event) {
         TaskManager.registerTask(TaskNotificationCopiedCode.class);
         TaskManager.registerTask(TaskNotificationCopiedLink.class);
         ApplicationManager.registerApplication(new ResourceLocation(Reference.MOD_ID, "gitwebbuilder_app"), GWBApp.class);
     }
 
     @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event){}
-
+    public void postInit(FMLPostInitializationEvent event) {
+    }
 }
