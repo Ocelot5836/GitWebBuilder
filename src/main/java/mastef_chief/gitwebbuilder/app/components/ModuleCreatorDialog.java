@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 
 import com.mrcrayfish.device.Reference;
@@ -694,12 +695,52 @@ public class ModuleCreatorDialog extends Dialog {
 
             int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
             int inventoryY = 80;
-            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 136, 128, 73, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), new InventorySlot(inventoryX + 14, inventoryY + 8), new InventorySlot(inventoryX + 75, inventoryY + 8), new InventorySlot(inventoryX + 52, inventoryY + 42), new InventorySlot(inventoryX + 75, inventoryY + 49), new InventorySlot(inventoryX + 98, inventoryY + 42));
+            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 136, 128, 73, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 13, inventoryY + 7, true), new InventorySlot(inventoryX + 74, inventoryY + 7), new InventorySlot(inventoryX + 51, inventoryY + 41), new InventorySlot(inventoryX + 74, inventoryY + 48), new InventorySlot(inventoryX + 97, inventoryY + 41));
             inventory.setStackInSlot(0, new ItemStack(Items.BLAZE_POWDER));
-            inventory.setStackInSlot(1, new ItemStack(Items.NETHER_STAR));
-            inventory.setStackInSlot(2, new ItemStack(Items.GLASS_BOTTLE));
-            inventory.setStackInSlot(3, new ItemStack(Items.GLASS_BOTTLE));
-            inventory.setStackInSlot(4, new ItemStack(Items.GLASS_BOTTLE));
+            inventory.setItemClickListener((slot, index, mouseButton) -> {
+                if (index > 0) {
+                    if (mouseButton == 0) {
+                        ItemSelectionDialog dialog = new ItemSelectionDialog();
+                        dialog.setItemClickListener((slot1, index1, mouseButton1) -> {
+                            inventory.setStackInSlot(index, slot1.getStack());
+                        });
+                        this.openDialog(dialog);
+                    }
+                    if (mouseButton == 1 && !slot.getStack().isEmpty()) {
+                        Dialog.Input dialog = new Dialog.Input(slot.getStack().getItem().getItemStackDisplayName(slot.getStack()));
+                        dialog.setTitle("Set Count");
+                        dialog.setInputText(Integer.toString(slot.getStack().getCount()));
+                        dialog.setResponseHandler((success, input) -> {
+                            if (success) {
+                                ItemStack stack = slot.getStack();
+                                if (StringUtils.isNumeric(input)) {
+                                    try {
+                                        int count = Integer.parseInt(input);
+                                        if (count <= 0 || count > stack.getMaxStackSize()) {
+                                            Dialog.Message error = new Dialog.Message("Invalid stack size \'" + input + "\' for item \'" + stack.getDisplayName() + "\'. " + (stack.getMaxStackSize() == 1 ? "Must be 1." : "Must be from 1 to " + stack.getMaxStackSize()));
+                                            error.setTitle("Error");
+                                            this.openDialog(error);
+                                        } else {
+                                            stack.setCount(count);
+                                            return true;
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        Dialog.Message error = new Dialog.Message("Invalid integer \'" + input + "\'");
+                                        error.setTitle("Error");
+                                        this.openDialog(error);
+                                    }
+                                } else {
+                                    Dialog.Message error = new Dialog.Message("Invalid number \'" + input + "\'");
+                                    error.setTitle("Error");
+                                    this.openDialog(error);
+                                }
+                            }
+                            return false;
+                        });
+                        this.openDialog(dialog);
+                    }
+                }
+            });
             scrollableLayout.addComponent(inventory);
 
             Label titleLabel = new Label("Title:", 5, 8);
@@ -857,7 +898,111 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case FURNACE: {
-            // TODO add furnace
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 164, LAYOUT_HEIGHT - 25);
+            scrollableLayout.setScrollSpeed(8);
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
+                Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 220, Color.gray.getRGB());
+            });
+
+            int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
+            int inventoryY = 80;
+            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 68, 128, 68, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 25, inventoryY + 7), new InventorySlot(inventoryX + 25, inventoryY + 43), new InventorySlot(inventoryX + 85, inventoryY + 25));
+            inventory.setItemClickListener((slot, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    ItemSelectionDialog dialog = new ItemSelectionDialog();
+                    dialog.setItemClickListener((slot1, index1, mouseButton1) -> {
+                        inventory.setStackInSlot(index, slot1.getStack());
+                    });
+                    this.openDialog(dialog);
+                }
+                if (mouseButton == 1 && !slot.getStack().isEmpty()) {
+                    Dialog.Input dialog = new Dialog.Input(slot.getStack().getItem().getItemStackDisplayName(slot.getStack()));
+                    dialog.setTitle("Set Count");
+                    dialog.setInputText(Integer.toString(slot.getStack().getCount()));
+                    dialog.setResponseHandler((success, input) -> {
+                        if (success) {
+                            ItemStack stack = slot.getStack();
+                            if (StringUtils.isNumeric(input)) {
+                                try {
+                                    int count = Integer.parseInt(input);
+                                    if (count <= 0 || count > stack.getMaxStackSize()) {
+                                        Dialog.Message error = new Dialog.Message("Invalid stack size \'" + input + "\' for item \'" + stack.getDisplayName() + "\'. " + (stack.getMaxStackSize() == 1 ? "Must be 1." : "Must be from 1 to " + stack.getMaxStackSize()));
+                                        error.setTitle("Error");
+                                        this.openDialog(error);
+                                    } else {
+                                        stack.setCount(count);
+                                        return true;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    Dialog.Message error = new Dialog.Message("Invalid integer \'" + input + "\'");
+                                    error.setTitle("Error");
+                                    this.openDialog(error);
+                                }
+                            } else {
+                                Dialog.Message error = new Dialog.Message("Invalid number \'" + input + "\'");
+                                error.setTitle("Error");
+                                this.openDialog(error);
+                            }
+                        }
+                        return false;
+                    });
+                    this.openDialog(dialog);
+                }
+            });
+            scrollableLayout.addComponent(inventory);
+
+            Label titleLabel = new Label("Title:", 5, 8);
+            scrollableLayout.addComponent(titleLabel);
+            TextField titleTextField = new TextField(5, 18, 162);
+            scrollableLayout.addComponent(titleTextField);
+
+            Label descLabel = new Label("Description:", 5, 38);
+            scrollableLayout.addComponent(descLabel);
+            TextField descTextField = new TextField(5, 48, 162);
+            scrollableLayout.addComponent(descTextField);
+
+            layout.addComponent(scrollableLayout);
+
+            int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
+            buttonPositive = new Button(125, 130, positiveText);
+            buttonPositive.setSize(positiveWidth + 10, 16);
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
+                if (mouseButton == 0) {
+                    selectedTextArea.performReturn();
+                    selectedTextArea.writeText("#furnace");
+                    selectedTextArea.performReturn();
+                    if (!titleTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("title=" + titleTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!descTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("desc=" + descTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!inventory.getStackInSlot(0).isEmpty()) {
+                        selectedTextArea.writeText("slot-input=" + inventory.getStackInSlot(0).serializeNBT());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!inventory.getStackInSlot(1).isEmpty()) {
+                        selectedTextArea.writeText("slot-fuel=" + inventory.getStackInSlot(1).serializeNBT());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!inventory.getStackInSlot(2).isEmpty()) {
+                        selectedTextArea.writeText("slot-result=" + inventory.getStackInSlot(2).serializeNBT());
+                        selectedTextArea.performReturn();
+                    }
+
+                    close();
+                }
+            });
+            layout.addComponent(buttonPositive);
+
+            int negativeWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(negativeText);
+            buttonNegative = new Button(75, 130, negativeText);
+            buttonNegative.setSize(negativeWidth + 10, 16);
+            buttonNegative.setClickListener((mouseX, mouseY, mouseButton) -> close());
+            layout.addComponent(buttonNegative);
             break;
         }
         case FOOTER: {
@@ -1091,11 +1236,215 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case CRAFTING: {
-            // TODO add crafting
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 164, LAYOUT_HEIGHT - 25);
+            scrollableLayout.setScrollSpeed(8);
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
+                Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 220, Color.gray.getRGB());
+            });
+
+            int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
+            int inventoryY = 80;
+            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 0, 128, 68, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 7, inventoryY + 7), new InventorySlot(inventoryX + 25, inventoryY + 7), new InventorySlot(inventoryX + 43, inventoryY + 7), new InventorySlot(inventoryX + 7, inventoryY + 25), new InventorySlot(inventoryX + 25, inventoryY + 25), new InventorySlot(inventoryX + 43, inventoryY + 25), new InventorySlot(inventoryX + 7, inventoryY + 43), new InventorySlot(inventoryX + 25, inventoryY + 43), new InventorySlot(inventoryX + 43, inventoryY + 43), new InventorySlot(inventoryX + 98, inventoryY + 25));
+            inventory.setItemClickListener((slot, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    ItemSelectionDialog dialog = new ItemSelectionDialog();
+                    dialog.setItemClickListener((slot1, index1, mouseButton1) -> {
+                        inventory.setStackInSlot(index, slot1.getStack());
+                    });
+                    this.openDialog(dialog);
+                }
+                if (mouseButton == 1 && !slot.getStack().isEmpty()) {
+                    Dialog.Input dialog = new Dialog.Input(slot.getStack().getItem().getItemStackDisplayName(slot.getStack()));
+                    dialog.setTitle("Set Count");
+                    dialog.setInputText(Integer.toString(slot.getStack().getCount()));
+                    dialog.setResponseHandler((success, input) -> {
+                        if (success) {
+                            ItemStack stack = slot.getStack();
+                            if (StringUtils.isNumeric(input)) {
+                                try {
+                                    int count = Integer.parseInt(input);
+                                    if (count <= 0 || count > stack.getMaxStackSize()) {
+                                        Dialog.Message error = new Dialog.Message("Invalid stack size \'" + input + "\' for item \'" + stack.getDisplayName() + "\'. " + (stack.getMaxStackSize() == 1 ? "Must be 1." : "Must be from 1 to " + stack.getMaxStackSize()));
+                                        error.setTitle("Error");
+                                        this.openDialog(error);
+                                    } else {
+                                        stack.setCount(count);
+                                        return true;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    Dialog.Message error = new Dialog.Message("Invalid integer \'" + input + "\'");
+                                    error.setTitle("Error");
+                                    this.openDialog(error);
+                                }
+                            } else {
+                                Dialog.Message error = new Dialog.Message("Invalid number \'" + input + "\'");
+                                error.setTitle("Error");
+                                this.openDialog(error);
+                            }
+                        }
+                        return false;
+                    });
+                    this.openDialog(dialog);
+                }
+            });
+            scrollableLayout.addComponent(inventory);
+
+            Label titleLabel = new Label("Title:", 5, 8);
+            scrollableLayout.addComponent(titleLabel);
+            TextField titleTextField = new TextField(5, 18, 162);
+            scrollableLayout.addComponent(titleTextField);
+
+            Label descLabel = new Label("Description:", 5, 38);
+            scrollableLayout.addComponent(descLabel);
+            TextField descTextField = new TextField(5, 48, 162);
+            scrollableLayout.addComponent(descTextField);
+
+            layout.addComponent(scrollableLayout);
+
+            int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
+            buttonPositive = new Button(125, 130, positiveText);
+            buttonPositive.setSize(positiveWidth + 10, 16);
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
+                if (mouseButton == 0) {
+                    selectedTextArea.performReturn();
+                    selectedTextArea.writeText("#crafting");
+                    selectedTextArea.performReturn();
+                    if (!titleTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("title=" + titleTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!descTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("desc=" + descTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    for (int i = 0; i < 9; i++) {
+                        if (!inventory.getStackInSlot(i).isEmpty()) {
+                            selectedTextArea.writeText("slot-" + (i + 1) + "=" + inventory.getStackInSlot(i).serializeNBT());
+                            selectedTextArea.performReturn();
+                        }
+                    }
+                    if (!inventory.getStackInSlot(9).isEmpty()) {
+                        selectedTextArea.writeText("slot-result=" + inventory.getStackInSlot(9).serializeNBT());
+                        selectedTextArea.performReturn();
+                    }
+
+                    close();
+                }
+            });
+            layout.addComponent(buttonPositive);
+
+            int negativeWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(negativeText);
+            buttonNegative = new Button(75, 130, negativeText);
+            buttonNegative.setSize(negativeWidth + 10, 16);
+            buttonNegative.setClickListener((mouseX, mouseY, mouseButton) -> close());
+            layout.addComponent(buttonNegative);
             break;
         }
         case ANVIL: {
-            // TODO add anvil
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 128, LAYOUT_HEIGHT - 25);
+            scrollableLayout.setScrollSpeed(8);
+            scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
+                Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
+                gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 220, Color.gray.getRGB());
+            });
+
+            int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
+            int inventoryY = 80;
+            ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 209, 128, 32, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 11, inventoryY + 7), new InventorySlot(inventoryX + 50, inventoryY + 7), new InventorySlot(inventoryX + 98, inventoryY + 7));
+            inventory.setItemClickListener((slot, index, mouseButton) -> {
+                if (mouseButton == 0) {
+                    ItemSelectionDialog dialog = new ItemSelectionDialog();
+                    dialog.setItemClickListener((slot1, index1, mouseButton1) -> {
+                        inventory.setStackInSlot(index, slot1.getStack());
+                    });
+                    this.openDialog(dialog);
+                }
+                if (mouseButton == 1 && !slot.getStack().isEmpty()) {
+                    Dialog.Input dialog = new Dialog.Input(slot.getStack().getItem().getItemStackDisplayName(slot.getStack()));
+                    dialog.setTitle("Set Count");
+                    dialog.setInputText(Integer.toString(slot.getStack().getCount()));
+                    dialog.setResponseHandler((success, input) -> {
+                        if (success) {
+                            ItemStack stack = slot.getStack();
+                            if (StringUtils.isNumeric(input)) {
+                                try {
+                                    int count = Integer.parseInt(input);
+                                    if (count <= 0 || count > stack.getMaxStackSize()) {
+                                        Dialog.Message error = new Dialog.Message("Invalid stack size \'" + input + "\' for item \'" + stack.getDisplayName() + "\'. " + (stack.getMaxStackSize() == 1 ? "Must be 1." : "Must be from 1 to " + stack.getMaxStackSize()));
+                                        error.setTitle("Error");
+                                        this.openDialog(error);
+                                    } else {
+                                        stack.setCount(count);
+                                        return true;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    Dialog.Message error = new Dialog.Message("Invalid integer \'" + input + "\'");
+                                    error.setTitle("Error");
+                                    this.openDialog(error);
+                                }
+                            } else {
+                                Dialog.Message error = new Dialog.Message("Invalid number \'" + input + "\'");
+                                error.setTitle("Error");
+                                this.openDialog(error);
+                            }
+                        }
+                        return false;
+                    });
+                    this.openDialog(dialog);
+                }
+            });
+            scrollableLayout.addComponent(inventory);
+
+            Label titleLabel = new Label("Title:", 5, 8);
+            scrollableLayout.addComponent(titleLabel);
+            TextField titleTextField = new TextField(5, 18, 162);
+            scrollableLayout.addComponent(titleTextField);
+
+            Label descLabel = new Label("Description:", 5, 38);
+            scrollableLayout.addComponent(descLabel);
+            TextField descTextField = new TextField(5, 48, 162);
+            scrollableLayout.addComponent(descTextField);
+
+            layout.addComponent(scrollableLayout);
+
+            int positiveWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(positiveText);
+            buttonPositive = new Button(125, 130, positiveText);
+            buttonPositive.setSize(positiveWidth + 10, 16);
+            buttonPositive.setClickListener((mouseX, mouseY, mouseButton) -> {
+                if (mouseButton == 0) {
+                    selectedTextArea.performReturn();
+                    selectedTextArea.writeText("#anvil");
+                    selectedTextArea.performReturn();
+                    if (!titleTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("title=" + titleTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    if (!descTextField.getText().isEmpty()) {
+                        selectedTextArea.writeText("desc=" + descTextField.getText());
+                        selectedTextArea.performReturn();
+                    }
+                    for (int i = 0; i < 2; i++) {
+                        if (!inventory.getStackInSlot(i).isEmpty()) {
+                            selectedTextArea.writeText("slot-" + (i + 1) + "=" + inventory.getStackInSlot(i).serializeNBT());
+                            selectedTextArea.performReturn();
+                        }
+                    }
+                    if (!inventory.getStackInSlot(2).isEmpty()) {
+                        selectedTextArea.writeText("slot-result=" + inventory.getStackInSlot(2).serializeNBT());
+                        selectedTextArea.performReturn();
+                    }
+
+                    close();
+                }
+            });
+            layout.addComponent(buttonPositive);
+
+            int negativeWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(negativeText);
+            buttonNegative = new Button(75, 130, negativeText);
+            buttonNegative.setSize(negativeWidth + 10, 16);
+            buttonNegative.setClickListener((mouseX, mouseY, mouseButton) -> close());
+            layout.addComponent(buttonNegative);
             break;
         }
         case HEADER: {

@@ -8,39 +8,57 @@ import com.mrcrayfish.device.api.app.listener.ItemClickListener;
 import com.mrcrayfish.device.core.Laptop;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.config.GuiUtils;
 
 public class ComponentInventory extends Layout {
 
     private ItemClickListener<InventorySlot> listener;
+
     private InventorySlot[] inventory;
     private int selectedIndex;
+    private boolean highlightSelectedIndex;
 
-    public ComponentInventory(int left, int top, int width, int height, @Nullable Image gui, InventorySlot... slots) {
+    public ComponentInventory(int left, int top, int width, int height, @Nullable Image gui, boolean highlightSelectedIndex, InventorySlot... inventory) {
         super(left, top, width, height);
         this.listener = null;
-        this.inventory = slots;
-        this.addComponent(gui == null ? new Image(0, 0, 0, 0, 256, 256, TextureMap.LOCATION_MISSING_TEXTURE) : gui);
-        this.clearItems();
+        this.highlightSelectedIndex = highlightSelectedIndex;
+        this.inventory = inventory;
+        if (gui != null) {
+            this.addComponent(gui);
+        }
     }
 
     @Override
     public void render(Laptop laptop, Minecraft mc, int x, int y, int mouseX, int mouseY, boolean windowActive, float partialTicks) {
         super.render(laptop, mc, x, y, mouseX, mouseY, windowActive, partialTicks);
-        this.selectedIndex = -1;
-        for (int i = 0; i < this.inventory.length; i++) {
-            InventorySlot slot = this.inventory[i];
-            ItemStack stack = slot.getStack();
-            if (!stack.isEmpty()) {
-                GlStateManager.enableDepth();
-                mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x + slot.getX(), y + slot.getY());
-                mc.getRenderItem().renderItemOverlays(mc.fontRenderer, stack, x + slot.getX(), y + slot.getY());
-                GlStateManager.disableDepth();
-                if (mouseX >= x + slot.getX() - 1 && mouseX < x + slot.getX() + 17 && mouseY >= y + slot.getY() - 1 && mouseY < y + slot.getY() + 17) {
+        if (windowActive) {
+            this.selectedIndex = -1;
+            int removes = 0;
+            for (int i = 0; i < this.inventory.length; i++) {
+                InventorySlot slot = this.inventory[i];
+                ItemStack stack = slot.getStack();
+                if (!stack.isEmpty()) {
+                    GlStateManager.enableDepth();
+                    RenderHelper.enableGUIStandardItemLighting();
+                    mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x + slot.getX() + 1, y + slot.getY() + 1);
+                    mc.getRenderItem().renderItemOverlays(mc.fontRenderer, stack, x + slot.getX() + 1, y + slot.getY() + 1);
+                    RenderHelper.disableStandardItemLighting();
+                    GlStateManager.disableDepth();
+                    GlStateManager.enableAlpha();
+                }
+                if (mouseX >= x + slot.getX() && mouseX < x + slot.getX() + 18 && mouseY >= y + slot.getY() && mouseY < y + slot.getY() + 18) {
                     this.selectedIndex = i;
+                }
+            }
+
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.inventory.length) {
+                InventorySlot slot = this.inventory[this.selectedIndex];
+                if (!slot.isLocked()) {
+                    Gui.drawRect(x + slot.getX() + 1, y + slot.getY() + 1, x + slot.getX() + 17, y + slot.getY() + 17, -2130706433);
                 }
             }
         }
@@ -49,18 +67,25 @@ public class ComponentInventory extends Layout {
     @Override
     public void renderOverlay(Laptop laptop, Minecraft mc, int mouseX, int mouseY, boolean windowActive) {
         super.renderOverlay(laptop, mc, mouseX, mouseY, windowActive);
-        if (this.selectedIndex >= 0 && this.selectedIndex < this.inventory.length) {
-            ItemStack stack = this.inventory[this.selectedIndex].getStack();
-            GuiUtils.preItemToolTip(stack);
-            laptop.drawHoveringText(laptop.getItemToolTip(stack), mouseX, mouseY);
-            GuiUtils.postItemToolTip();
+        if (windowActive) {
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.inventory.length) {
+                ItemStack stack = this.inventory[this.selectedIndex].getStack();
+                if (!stack.isEmpty()) {
+                    GuiUtils.preItemToolTip(stack);
+                    laptop.drawHoveringText(laptop.getItemToolTip(stack), mouseX, mouseY);
+                    GuiUtils.postItemToolTip();
+                    GlStateManager.disableLighting();
+                }
+            }
         }
     }
 
     @Override
     public void handleMouseClick(int mouseX, int mouseY, int mouseButton) {
         if (this.selectedIndex >= 0 && this.selectedIndex < this.inventory.length && this.listener != null) {
-            this.listener.onClick(this.inventory[this.selectedIndex], this.selectedIndex, mouseButton);
+            if (this.listener != null) {
+                this.listener.onClick(this.inventory[this.selectedIndex], this.selectedIndex, mouseButton);
+            }
         }
         super.handleMouseClick(mouseX, mouseY, mouseButton);
     }
@@ -83,7 +108,7 @@ public class ComponentInventory extends Layout {
         return this.inventory[slot].getStack();
     }
 
-    public void setListener(@Nullable ItemClickListener<InventorySlot> listener) {
+    public void setItemClickListener(@Nullable ItemClickListener<InventorySlot> listener) {
         this.listener = listener;
     }
 
@@ -92,11 +117,17 @@ public class ComponentInventory extends Layout {
         private ItemStack stack;
         private int x;
         private int y;
+        private boolean locked;
 
         public InventorySlot(int x, int y) {
+            this(x, y, false);
+        }
+
+        public InventorySlot(int x, int y, boolean locked) {
             this.stack = ItemStack.EMPTY;
             this.x = x;
             this.y = y;
+            this.locked = locked;
         }
 
         public void setStack(@Nullable ItemStack stack) {
@@ -113,6 +144,10 @@ public class ComponentInventory extends Layout {
 
         public int getY() {
             return y;
+        }
+
+        public boolean isLocked() {
+            return locked;
         }
     }
 }

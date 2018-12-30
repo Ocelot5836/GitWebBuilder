@@ -107,8 +107,6 @@ public class GWBApp extends Application {
 
     // TODO work on save method to enable and disable save button
     private String savedData;
-
-    private boolean isSaved;
     private boolean autoSave = true;
 
     private File currentFile;
@@ -609,8 +607,6 @@ public class GWBApp extends Application {
         moduleSelctionLayout.addComponent(downloadModuleButton);
 
         furnaceModuleButton = new Button(1, 73, 62, 16, "Furnace");
-        furnaceModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
-        furnaceModuleButton.setEnabled(false);
         furnaceModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.FURNACE, siteBuilderTextArea, this);
@@ -638,8 +634,6 @@ public class GWBApp extends Application {
         moduleSelctionLayout.addComponent(dividerModuleButton);
 
         craftingModuleButton = new Button(1, 127, 62, 16, "Crafting");
-        craftingModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
-        craftingModuleButton.setEnabled(false);
         craftingModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.CRAFTING, siteBuilderTextArea, this);
@@ -649,8 +643,6 @@ public class GWBApp extends Application {
         moduleSelctionLayout.addComponent(craftingModuleButton);
 
         anvilModuleButton = new Button(1, 145, 62, 16, "Anvil");
-        anvilModuleButton.setToolTip("Unavailable", "This module is currently being worked on.");
-        anvilModuleButton.setEnabled(false);
         anvilModuleButton.setClickListener((mouseX, mouseY, mouseButton) -> {
             if (mouseButton == 0) {
                 ModuleCreatorDialog moduleCreatorDialog = new ModuleCreatorDialog(EnumModuleType.ANVIL, siteBuilderTextArea, this);
@@ -814,9 +806,8 @@ public class GWBApp extends Application {
                 if (currentFile != null) {
                     NBTTagCompound data = new NBTTagCompound();
                     data.setString("content", siteBuilderTextArea.getText());
-                    currentFile.setData(data, (v, success) -> {
+                    currentFile.setData(data, (file, success) -> {
                         if (success) {
-
                         }
                     });
                 } else {
@@ -826,7 +817,9 @@ public class GWBApp extends Application {
                     Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                     saveDialog.setFolder(getApplicationFolderPath());
                     saveDialog.setResponseHandler((success, file) -> {
-                        currentFile = file;
+                        if (success) {
+                            currentFile = file;
+                        }
                         return true;
                     });
                     this.openDialog(saveDialog);
@@ -840,7 +833,9 @@ public class GWBApp extends Application {
                 Dialog.SaveFile saveDialog = new Dialog.SaveFile(this, data);
                 saveDialog.setFolder(getApplicationFolderPath());
                 saveDialog.setResponseHandler((success, file) -> {
-                    currentFile = file;
+                    if (success) {
+                        currentFile = file;
+                    }
                     return true;
                 });
                 this.openDialog(saveDialog);
@@ -948,8 +943,12 @@ public class GWBApp extends Application {
 
     private void getCode(String url) {
         OnlineRequest.getInstance().make(url, (success, response) -> {
-            if (success) {
-                siteBuilderTextArea.setText(response.replace("\n\n", "\n").replace("&nl", "\n"));
+            if (success && !(response.startsWith("404"))) {
+                this.siteBuilderTextArea.setText(response.replace("\n\n", "\n").replace("&nl", "\n"));
+            } else {
+                Dialog dialog = new Dialog.Message(response);
+                dialog.setTitle(url);
+                this.openDialog(dialog);
             }
         });
     }
@@ -960,15 +959,11 @@ public class GWBApp extends Application {
 
     private static TextFormatting[] getFormatting(TextFormatting... formatting) {
         TextFormatting[] array = new TextFormatting[carriedFormatting.length + formatting.length];
-        try {
-            for (int i = 0; i < array.length; i++) {
-                if (i < carriedFormatting.length)
-                    array[i] = carriedFormatting[i];
-                else
-                    array[i] = formatting[i - carriedFormatting.length];
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 0; i < array.length; i++) {
+            if (i < carriedFormatting.length)
+                array[i] = carriedFormatting[i];
+            else
+                array[i] = formatting[i - carriedFormatting.length];
         }
         return array;
     }
