@@ -686,7 +686,7 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case BREWING: {
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 169, LAYOUT_HEIGHT - 25);
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 167, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
@@ -694,7 +694,7 @@ public class ModuleCreatorDialog extends Dialog {
             });
 
             int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
-            int inventoryY = 80;
+            int inventoryY = 78;
             ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 136, 128, 73, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 13, inventoryY + 7, true), new InventorySlot(inventoryX + 74, inventoryY + 7), new InventorySlot(inventoryX + 51, inventoryY + 41), new InventorySlot(inventoryX + 74, inventoryY + 48), new InventorySlot(inventoryX + 97, inventoryY + 41));
             inventory.setStackInSlot(0, new ItemStack(Items.BLAZE_POWDER));
             inventory.setItemClickListener((slot, index, mouseButton) -> {
@@ -898,7 +898,7 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case FURNACE: {
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 164, LAYOUT_HEIGHT - 25);
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 160, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
@@ -906,7 +906,7 @@ public class ModuleCreatorDialog extends Dialog {
             });
 
             int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
-            int inventoryY = 80;
+            int inventoryY = 78;
             ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 68, 128, 68, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 25, inventoryY + 7), new InventorySlot(inventoryX + 25, inventoryY + 43), new InventorySlot(inventoryX + 85, inventoryY + 25));
             inventory.setItemClickListener((slot, index, mouseButton) -> {
                 if (mouseButton == 0) {
@@ -1236,7 +1236,7 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case CRAFTING: {
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 164, LAYOUT_HEIGHT - 25);
+            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 160, LAYOUT_HEIGHT - 25);
             scrollableLayout.setScrollSpeed(8);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
@@ -1244,7 +1244,7 @@ public class ModuleCreatorDialog extends Dialog {
             });
 
             int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
-            int inventoryY = 80;
+            int inventoryY = 78;
             ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 0, 128, 68, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 7, inventoryY + 7), new InventorySlot(inventoryX + 25, inventoryY + 7), new InventorySlot(inventoryX + 43, inventoryY + 7), new InventorySlot(inventoryX + 7, inventoryY + 25), new InventorySlot(inventoryX + 25, inventoryY + 25), new InventorySlot(inventoryX + 43, inventoryY + 25), new InventorySlot(inventoryX + 7, inventoryY + 43), new InventorySlot(inventoryX + 25, inventoryY + 43), new InventorySlot(inventoryX + 43, inventoryY + 43), new InventorySlot(inventoryX + 98, inventoryY + 25));
             inventory.setItemClickListener((slot, index, mouseButton) -> {
                 if (mouseButton == 0) {
@@ -1342,15 +1342,14 @@ public class ModuleCreatorDialog extends Dialog {
             break;
         }
         case ANVIL: {
-            ScrollableLayout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 128, LAYOUT_HEIGHT - 25);
-            scrollableLayout.setScrollSpeed(8);
+            Layout scrollableLayout = new ScrollableLayout(0, 0, LAYOUT_WIDTH, 124, LAYOUT_HEIGHT - 25);
             scrollableLayout.setBackground((gui, mc, x, y, width, height, mouseX, mouseY, windowActive) -> {
                 Color color = new Color(Laptop.getSystem().getSettings().getColorScheme().getItemBackgroundColor());
                 gui.drawRect(x, y, x + LAYOUT_WIDTH, y + 220, Color.gray.getRGB());
             });
 
             int inventoryX = LAYOUT_WIDTH / 2 - 128 / 2;
-            int inventoryY = 80;
+            int inventoryY = 78;
             ComponentInventory inventory = new ComponentInventory(0, 0, scrollableLayout.width, scrollableLayout.height, new Image(inventoryX, inventoryY, 0, 209, 128, 32, new ResourceLocation(Reference.MOD_ID, "textures/gui/container_boxes.png")), true, new InventorySlot(inventoryX + 11, inventoryY + 7), new InventorySlot(inventoryX + 50, inventoryY + 7), new InventorySlot(inventoryX + 98, inventoryY + 7));
             inventory.setItemClickListener((slot, index, mouseButton) -> {
                 if (mouseButton == 0) {
